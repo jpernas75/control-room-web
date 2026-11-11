@@ -17,7 +17,7 @@ export default async function PaginaBandeja() {
     vin: l.vin,
     centro: l.centro?.nombre ?? "Sin centro",
     cliente: l.cliente,
-    vehiculo: [l.matricula, l.modelo].filter(Boolean).join(" · "),
+    vehiculo: l.matricula,
     detalle: l.origen === "PREVENTIVO" ? l.obs || l.trigger : l.prediagnostico,
     situacionKey: l.situacion.key,
     situacionTexto: l.situacion.texto,

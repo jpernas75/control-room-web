@@ -112,6 +112,10 @@ function unicos(filas: FilaBandeja[], pick: (f: FilaBandeja) => string): string[
   return [...new Set(filas.map(pick).map((v) => v.trim()).filter(Boolean))].sort((a, b) => cmp(a, b));
 }
 
+function normalizar(texto: string): string {
+  return texto.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "").trim();
+}
+
 function recortar(texto: string, max: number): string {
   const limpio = texto.replace(/\s+/g, " ").trim();
   return limpio.length > max ? `${limpio.slice(0, max - 1)}…` : limpio;
@@ -122,6 +126,7 @@ export function Bandeja({ filas }: { filas: FilaBandeja[] }) {
   const [ocultarDeshabilitadas, setOcultarDeshabilitadas] = useState(false);
   const [ocultarAlertas, setOcultarAlertas] = useState(false);
   const [filtro, setFiltro] = useState<FiltroCr>(FILTRO_INICIAL);
+  const [busqueda, setBusqueda] = useState("");
   const [sortCr, setSortCr] = useState<{ key: SortKey; dir: "asc" | "desc" }>({ key: "fecha", dir: "desc" });
   const [sortPrev, setSortPrev] = useState<{ key: SortKey; dir: "asc" | "desc" }>({ key: "situacion", dir: "asc" });
 
@@ -153,12 +158,14 @@ export function Bandeja({ filas }: { filas: FilaBandeja[] }) {
   const situacion = opciones.situacion.includes(filtro.situacion) ? filtro.situacion : "";
   const estado = opciones.estado.includes(filtro.estado) ? filtro.estado : "";
   const detalle = opciones.detalle.includes(filtro.detalle) ? filtro.detalle : "";
+  const consulta = normalizar(busqueda);
 
   const rooms = ordenar(
     roomsBase.filter((f) => {
       if (situacion && f.situacionTexto !== situacion) return false;
       if (estado && f.estadoIcss !== estado) return false;
       if (detalle && f.detalle !== detalle) return false;
+      if (consulta && !normalizar([f.expedienteId, f.cliente, f.vehiculo, f.detalle].join(" ")).includes(consulta)) return false;
       return true;
     }),
     sortCr.key,
@@ -180,7 +187,7 @@ export function Bandeja({ filas }: { filas: FilaBandeja[] }) {
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-6">
+    <main className="mx-auto w-full max-w-[1600px] px-4 py-6 lg:px-6">
       <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Filtrar por centro">
         <button
           type="button"
@@ -212,6 +219,17 @@ export function Bandeja({ filas }: { filas: FilaBandeja[] }) {
           <SelectFiltro label="Situación" value={situacion} options={opciones.situacion} onChange={(value) => setFiltro({ ...filtro, situacion: value })} />
           <SelectFiltro label="Estado" value={estado} options={opciones.estado} onChange={(value) => setFiltro({ ...filtro, estado: value })} />
           <SelectFiltro label="Detalle" value={detalle} options={opciones.detalle} largo onChange={(value) => setFiltro({ ...filtro, detalle: value })} />
+          <label className="w-full min-w-[16rem] max-w-sm flex-1 text-sm">
+            <span className="mb-1 block font-medium text-slate-700">Buscar</span>
+            <input
+              type="search"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              placeholder="Expediente, cliente, vehículo o detalle"
+              className="w-full rounded border border-slate-300 bg-white px-3 py-2"
+              aria-label="Buscar por expediente, cliente, vehículo o detalle"
+            />
+          </label>
         </div>
         <Tabla
           filas={rooms}
@@ -295,7 +313,7 @@ function Tabla({
   const columnas = controlRoom ? 10 : 7;
   return (
     <div className="overflow-x-auto">
-      <table className={`w-full text-left text-sm ${controlRoom ? "min-w-[1100px]" : "min-w-[880px]"}`}>
+      <table className={`w-full text-left text-xs ${controlRoom ? "min-w-[1100px]" : "min-w-[880px]"}`}>
         <thead className="bg-slate-50 text-xs text-slate-600">
           <tr>
             {controlRoom ? <SortTh label="Fecha" sortKey="fecha" sort={sort} onSort={onSort} /> : null}

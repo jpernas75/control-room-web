@@ -48,7 +48,7 @@ export default async function Calendario({
   const href = (m: string) => `/calendario?centro=${centroId}&mes=${m}`;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-6">
+    <main className="mx-auto w-full max-w-[1600px] px-4 py-6 lg:px-6">
       <div className="mb-4 flex flex-wrap items-center gap-3">
         {sesion.role === "ADMIN" ? (
           <form>
