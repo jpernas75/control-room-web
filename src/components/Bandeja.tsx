@@ -99,13 +99,21 @@ function claveOr(fila: FilaBandeja): string {
   return "0";
 }
 
-function ordenar(filas: FilaBandeja[], key: SortKey, dir: "asc" | "desc"): FilaBandeja[] {
+function comparar(a: FilaBandeja, b: FilaBandeja, key: SortKey, dir: "asc" | "desc"): number {
   const mul = dir === "asc" ? 1 : -1;
+  const va = valor(a, key);
+  const vb = valor(b, key);
+  const delta = typeof va === "number" && typeof vb === "number" ? va - vb : cmp(String(va), String(vb));
+  return delta * mul;
+}
+
+function ordenar(filas: FilaBandeja[], claves: { key: SortKey; dir: "asc" | "desc" }[]): FilaBandeja[] {
   return [...filas].sort((a, b) => {
-    const va = valor(a, key);
-    const vb = valor(b, key);
-    const delta = typeof va === "number" && typeof vb === "number" ? va - vb : cmp(String(va), String(vb));
-    return delta * mul;
+    for (const clave of claves) {
+      const delta = comparar(a, b, clave.key, clave.dir);
+      if (delta !== 0) return delta;
+    }
+    return 0;
   });
 }
 
@@ -187,13 +195,12 @@ export function Bandeja({ filas, inicial }: { filas: FilaBandeja[]; inicial: Vis
       if (consulta && !normalizar([f.expedienteId, f.cliente, f.vehiculo, f.detalle].join(" ")).includes(consulta)) return false;
       return true;
     }),
-    sortCr.key,
-    sortCr.dir,
+    [sortCr],
   );
+  const clavesPrev = sortPrev.key === "centro" ? [sortPrev, { key: "cliente" as const, dir: "asc" as const }] : [sortPrev];
   const preventivos = ordenar(
     base.filter((f) => f.origen === "PREVENTIVO"),
-    sortPrev.key,
-    sortPrev.dir,
+    clavesPrev,
   );
 
   function alternarCentro(nombre: string) {
