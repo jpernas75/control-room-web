@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { LlegadaPrevista, ReasignarCentro } from "@/components/CamposPreventivo";
 import { MarcarDesplazado } from "@/components/MarcarDesplazado";
 import { Nav } from "@/components/Nav";
 import { CENTROS } from "@/domain/centros";
@@ -8,7 +9,7 @@ import { hrefBandeja } from "@/domain/vista-bandeja";
 import { puedeEditar, puedeVer } from "@/domain/acceso";
 import { prisma } from "@/lib/prisma";
 import { sesionActual } from "@/lib/sesion";
-import { cambiarCentro, guardarComentario, guardarFechaPrevista, marcarDesplazado } from "./actions";
+import { cambiarCentro, guardarComentario, guardarFechaPrevista, guardarSolicitudCr, marcarDesplazado } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -91,17 +92,26 @@ export default async function Ficha({
           />
         ) : null}
 
-        <form action={cambiarCentro.bind(null, linea.id)} className="mt-6 flex items-end gap-2">
-          <label className="text-sm font-medium">
-            Reasignar centro
-            <select name="centro" defaultValue={linea.centro?.nombre ?? ""} disabled={!editar} className="mt-1 block rounded-md border border-slate-300 px-3 py-2">
-              {CENTROS.map((c) => (
-                <option key={c}>{c}</option>
-              ))}
-            </select>
-          </label>
-          {editar ? <button className="rounded-md border border-slate-300 px-3 py-2 text-sm" type="submit">Pasar</button> : null}
-        </form>
+        {linea.origen === "PREVENTIVO" ? (
+          <ReasignarCentro
+            key={linea.centro?.nombre ?? ""}
+            centro={linea.centro?.nombre ?? ""}
+            editar={editar}
+            action={cambiarCentro.bind(null, linea.id)}
+          />
+        ) : (
+          <form action={cambiarCentro.bind(null, linea.id)} className="mt-6 flex items-end gap-2">
+            <label className="text-sm font-medium">
+              Reasignar centro
+              <select name="centro" defaultValue={linea.centro?.nombre ?? ""} disabled={!editar} className="mt-1 block rounded-md border border-slate-300 px-3 py-2">
+                {CENTROS.map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+              </select>
+            </label>
+            {editar ? <button className="rounded-md border border-slate-300 px-3 py-2 text-sm" type="submit">Pasar</button> : null}
+          </form>
+        )}
 
         {linea.cambios.length > 0 ? (
           <ul className="mt-3 text-xs text-slate-500">
@@ -113,7 +123,17 @@ export default async function Ficha({
           </ul>
         ) : null}
 
-        {!linea.orFechaCita ? (
+        {linea.origen === "PREVENTIVO" && !linea.orFechaCita ? (
+          <LlegadaPrevista
+            key={`${linea.solicitarCr}-${linea.fechaPrevista ?? ""}`}
+            solicitar={linea.solicitarCr}
+            fecha={linea.fechaPrevista ?? ""}
+            editar={editar}
+            action={guardarSolicitudCr.bind(null, linea.id)}
+          />
+        ) : linea.orFechaCita ? (
+          <p className="mt-6 text-sm">Cita de ICSS: {linea.orFechaCita}. Fecha de llegada prevista: {linea.fechaPrevista || "ninguna"}.</p>
+        ) : (
           <form action={guardarFechaPrevista.bind(null, linea.id)} className="mt-6">
             <div className="flex items-end gap-2">
               <label className="text-sm font-medium">
@@ -124,8 +144,6 @@ export default async function Ficha({
             </div>
             <p className="mt-1 text-xs text-slate-500">Para que la fecha sea válida crear una cita en CAR</p>
           </form>
-        ) : (
-          <p className="mt-6 text-sm">Cita de ICSS: {linea.orFechaCita}. Fecha de llegada prevista: {linea.fechaPrevista || "ninguna"}.</p>
         )}
       </article>
       </main>

@@ -50,12 +50,28 @@ export async function cambiarCentro(id: string, formData: FormData) {
   const desde = ctx.linea.centroId
     ? (await prisma.centro.findUnique({ where: { id: ctx.linea.centroId } }))?.nombre ?? "Sin centro"
     : "Sin centro";
+  if (desde === hacia) return;
   await prisma.$transaction([
     prisma.linea.update({ where: { id }, data: { centroId: destino.id, centroManual: true } }),
     prisma.cambioCentro.create({ data: { lineaId: id, userId: ctx.sesion.id, desde, hacia } }),
   ]);
   revalidatePath(`/lineas/${id}`);
   revalidatePath("/");
+}
+
+export async function guardarSolicitudCr(id: string, formData: FormData) {
+  const ctx = await lineaEditable(id);
+  if (!ctx || ctx.linea.origen !== "PREVENTIVO" || ctx.linea.orFechaCita) return;
+  const solicitar = formData.get("solicitar") === "1";
+  const valor = String(formData.get("fecha") ?? "").trim();
+  if (valor && !/^\d{4}-\d{2}-\d{2}$/.test(valor)) return;
+  await prisma.linea.update({
+    where: { id },
+    data: { solicitarCr: solicitar, fechaPrevista: solicitar ? valor || null : null },
+  });
+  revalidatePath(`/lineas/${id}`);
+  revalidatePath("/");
+  revalidatePath("/calendario");
 }
 
 export async function guardarFechaPrevista(id: string, formData: FormData) {
