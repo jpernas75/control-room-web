@@ -82,6 +82,25 @@ describe("planImportJson", () => {
     expect(plan.acciones.some((a) => a.tipo === "upsert_cr" && a.datos.expedienteId === "viejo")).toBe(true);
   });
 
+  it("acepta el JSON que exporta ICSS (casos) y no deshabilita si la vista está filtrada", () => {
+    const dentro: LineaConocida = {
+      id: "c1", origen: "CONTROL_ROOM", presencia: "ACTIVA", expedienteId: "111",
+      vin: "A", fechaIso: "2026-08-01T00:00:00", cuenta: "13518", vco: false,
+    };
+    const plan = planImportJson(
+      {
+        period: payloadBase.period,
+        filtros: { buscar: "VCO", centro: "", centro2: "", tipo: "", estado: "", rapido: "" },
+        casos: [caso({ id: "8003019586" })],
+      },
+      [dentro],
+    );
+    expect(plan.ok).toBe(true);
+    if (!plan.ok) return;
+    expect(plan.aviso).toContain("filtrada");
+    expect(plan.acciones.map((a) => a.tipo)).toEqual(["upsert_cr"]);
+  });
+
   it("no deshabilita fuera de periodo ni si la cuenta vino con error", () => {
     const dentro: LineaConocida = {
       id: "c1", origen: "CONTROL_ROOM", presencia: "ACTIVA", expedienteId: "111",

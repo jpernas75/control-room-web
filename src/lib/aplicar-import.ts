@@ -66,7 +66,7 @@ export async function previsualizarJson(payload: unknown) {
   const lineas = await prisma.linea.findMany();
   const plan = planImportJson(payload, lineas.map(conocida));
   if (!plan.ok) return plan;
-  return { ok: true as const, resumen: resumirJson(plan.acciones) };
+  return { ok: true as const, resumen: resumirJson(plan.acciones), aviso: plan.aviso };
 }
 
 export async function aplicarJson(payload: unknown) {
@@ -113,7 +113,7 @@ export async function aplicarJson(payload: unknown) {
   });
   const resumen = resumirJson(plan.acciones);
   await prisma.importBatch.create({ data: { tipo: "JSON", resumen } });
-  return { ok: true as const, resumen };
+  return { ok: true as const, resumen, aviso: plan.aviso };
 }
 
 function camposPreventivo(d: DatosPreventivo, centroId: string | null) {

@@ -9,13 +9,15 @@ export type AccionJson =
   | { tipo: "deshabilitar"; lineaId: string; expedienteId: string };
 
 export type PlanJson =
-  | { ok: true; acciones: AccionJson[]; period: { from: string; to: string } }
+  | { ok: true; acciones: AccionJson[]; period: { from: string; to: string }; aviso: string | null }
   | { ok: false; error: string };
 
 type Payload = {
-  cases: Record<string, unknown>[];
+  casos: Record<string, unknown>[];
   period: { from: string; to: string };
-  meta: { sources: Record<string, unknown>[] };
+  sources: Record<string, unknown>[];
+  filtrado: boolean;
+  aviso: string | null;
 };
 
 function texto(v: unknown): string {
@@ -26,12 +28,36 @@ function vinDe(v: unknown): string {
   return texto(v).toUpperCase().replace(/\s+/g, "");
 }
 
-function esPayload(v: unknown): v is Payload {
-  if (!v || typeof v !== "object") return false;
+const CLAVES_FILTRO = ["centro", "centro2", "tipo", "estado", "buscar", "rapido"] as const;
+
+function leerPayload(v: unknown): Payload | null {
+  if (!v || typeof v !== "object") return null;
   const o = v as Record<string, unknown>;
+  const lista = Array.isArray(o.casos) ? o.casos : Array.isArray(o.cases) ? o.cases : null;
   const period = o.period as Record<string, unknown> | undefined;
+  if (!lista || typeof period?.from !== "string" || typeof period?.to !== "string") return null;
   const meta = o.meta as Record<string, unknown> | undefined;
-  return Array.isArray(o.cases) && typeof period?.from === "string" && typeof period?.to === "string" && Array.isArray(meta?.sources);
+  const sources = Array.isArray(meta?.sources)
+    ? meta.sources.filter((s): s is Record<string, unknown> => Boolean(s) && typeof s === "object")
+    : [];
+  const filtros = o.filtros as Record<string, unknown> | undefined;
+  const activos = filtros
+    ? CLAVES_FILTRO.filter((clave) => texto(filtros[clave])).map((clave) => `${clave}: ${texto(filtros[clave])}`)
+    : [];
+  const filtrado = activos.length > 0;
+  let aviso: string | null = null;
+  if (filtrado) {
+    aviso = `La exportación está filtrada (${activos.join(", ")}). Solo entran esos expedientes y no se deshabilita ninguno.`;
+  } else if (sources.length === 0) {
+    aviso = "El JSON no trae el estado de las cuentas ICSS, así que no se deshabilita ningún Control Room.";
+  }
+  return {
+    casos: lista.filter((c): c is Record<string, unknown> => Boolean(c) && typeof c === "object"),
+    period: { from: period.from, to: period.to },
+    sources,
+    filtrado,
+    aviso,
+  };
 }
 
 function casoADatos(caso: Record<string, unknown>): DatosCr | null {
@@ -92,8 +118,9 @@ function cuentaOk(cuenta: string | null, sources: Record<string, unknown>[]): bo
 }
 
 export function planImportJson(payload: unknown, lineas: LineaConocida[]): PlanJson {
-  if (!esPayload(payload)) return { ok: false, error: "El JSON no trae cases, period y meta.sources" };
-  const datos = payload.cases.map(casoADatos).filter((d): d is DatosCr => d !== null);
+  const leido = leerPayload(payload);
+  if (!leido) return { ok: false, error: "El JSON no trae los expedientes (casos) ni el periodo" };
+  const datos = leido.casos.map(casoADatos).filter((d): d is DatosCr => d !== null);
   const porExpediente = new Map(lineas.filter((l) => l.expedienteId).map((l) => [l.expedienteId as string, l]));
   const preventivoPorVin = new Map(lineas.filter((l) => l.origen === "PREVENTIVO").map((l) => [l.vin, l]));
   const elegido = new Map<string, string>();
@@ -130,10 +157,10 @@ export function planImportJson(payload: unknown, lineas: LineaConocida[]): PlanJ
   for (const l of lineas) {
     if (l.origen !== "CONTROL_ROOM" || !l.expedienteId || l.presencia === "DESHABILITADA") continue;
     if (vistos.has(l.expedienteId)) continue;
-    if (!dentro(l.fechaIso, payload.period) || !cuentaOk(l.cuenta, payload.meta.sources)) continue;
+    if (leido.filtrado || !dentro(l.fechaIso, leido.period) || !cuentaOk(l.cuenta, leido.sources)) continue;
     acciones.push({ tipo: "deshabilitar", lineaId: l.id, expedienteId: l.expedienteId });
   }
-  return { ok: true, acciones, period: payload.period };
+  return { ok: true, acciones, period: leido.period, aviso: leido.aviso };
 }
 
 export function resumirJson(acciones: AccionJson[]): { entran: number; actualizan: number; deshabilitan: number } {

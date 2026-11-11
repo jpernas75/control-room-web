@@ -24,13 +24,13 @@ export async function procesar(_prev: EstadoImport, formData: FormData): Promise
       const visto = await previsualizarJson(payload);
       if (!visto.ok) return { error: visto.error };
       const r = visto.resumen;
-      return { texto: `Entran ${r.entran}, se actualizan ${r.actualizan}, se deshabilitan ${r.deshabilitan}. Nada se ha guardado.` };
+      return { texto: `Entran ${r.entran}, se actualizan ${r.actualizan}, se deshabilitan ${r.deshabilitan}. ${visto.aviso ?? ""} Nada se ha guardado.` };
     }
     const hecho = await aplicarJson(payload);
     if (!hecho.ok) return { error: hecho.error };
     revalidatePath("/");
     const r = hecho.resumen;
-    return { texto: `Guardado. Entran ${r.entran}, se actualizan ${r.actualizan}, se deshabilitan ${r.deshabilitan}.` };
+    return { texto: `Guardado. Entran ${r.entran}, se actualizan ${r.actualizan}, se deshabilitan ${r.deshabilitan}. ${hecho.aviso ?? ""}` };
   }
   const buffer = Buffer.from(await file.arrayBuffer());
   if (intent !== "confirm") {
