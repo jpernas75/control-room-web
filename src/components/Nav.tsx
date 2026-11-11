@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Cabecera } from "./Cabecera";
@@ -8,6 +9,7 @@ function fecha(d: Date | undefined) {
 }
 
 export async function Nav() {
+  await connection();
   const sesion = await auth();
   if (!sesion?.user) return null;
   const [json, excel] = await Promise.all([
