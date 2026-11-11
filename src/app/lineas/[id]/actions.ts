@@ -26,6 +26,18 @@ export async function guardarComentario(id: string, formData: FormData) {
     },
   });
   revalidatePath(`/lineas/${id}`);
+  revalidatePath("/");
+}
+
+export async function marcarDesplazado(id: string, formData: FormData) {
+  const ctx = await lineaEditable(id);
+  if (!ctx || ctx.linea.origen !== "PREVENTIVO") return;
+  await prisma.linea.update({
+    where: { id },
+    data: { desplazado: formData.get("desplazado") === "1" },
+  });
+  revalidatePath(`/lineas/${id}`);
+  revalidatePath("/");
 }
 
 export async function cambiarCentro(id: string, formData: FormData) {

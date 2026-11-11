@@ -105,6 +105,7 @@ export async function aplicarJson(payload: unknown) {
           comentario: prev?.comentario || undefined,
           comentarioUserId: prev?.comentario ? prev.comentarioUserId : undefined,
           comentarioAt: prev?.comentario ? prev.comentarioAt : undefined,
+          desplazado: prev?.desplazado ?? undefined,
           fechaPrevista: prev?.fechaPrevista ?? undefined,
         },
       });

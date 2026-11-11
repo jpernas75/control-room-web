@@ -86,6 +86,7 @@ model Linea {
   comentarioUserId String?
   comentarioUser   User?      @relation("comentario", fields: [comentarioUserId], references: [id])
   comentarioAt     DateTime?
+  desplazado       Boolean    @default(false)
   fechaPrevista    String?
   cambios          CambioCentro[]
   createdAt        DateTime   @default(now())

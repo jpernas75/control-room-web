@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { Bandeja, type FilaBandeja } from "@/components/Bandeja";
 import { Nav } from "@/components/Nav";
+import { textoDetalle } from "@/domain/comentario";
 import { listarLineas } from "@/lib/lineas";
 import { sesionActual } from "@/lib/sesion";
 
@@ -19,7 +20,7 @@ export default async function PaginaBandeja() {
     centro: l.centro?.nombre ?? "Sin centro",
     cliente: l.cliente,
     vehiculo: l.matricula,
-    detalle: l.origen === "PREVENTIVO" ? l.obs || l.trigger : l.prediagnostico,
+    detalle: textoDetalle(l),
     situacionKey: l.situacion.key,
     situacionTexto: l.situacion.texto,
     estadoIcss: l.estadoIcss,
@@ -30,7 +31,7 @@ export default async function PaginaBandeja() {
     orEstado: l.orEstado,
     orUrl: l.orUrl,
     orFechaCita: l.orFechaCita,
-    comentario: l.comentario,
+    desplazado: l.desplazado,
   }));
   return (
     <>

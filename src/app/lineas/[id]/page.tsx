@@ -1,10 +1,12 @@
 import { notFound, redirect } from "next/navigation";
+import { MarcarDesplazado } from "@/components/MarcarDesplazado";
 import { Nav } from "@/components/Nav";
 import { CENTROS } from "@/domain/centros";
+import { textoDetalle } from "@/domain/comentario";
 import { puedeEditar, puedeVer } from "@/domain/acceso";
 import { prisma } from "@/lib/prisma";
 import { sesionActual } from "@/lib/sesion";
-import { cambiarCentro, guardarComentario, guardarFechaPrevista } from "./actions";
+import { cambiarCentro, guardarComentario, guardarFechaPrevista, marcarDesplazado } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +20,7 @@ export default async function Ficha({ params }: { params: Promise<{ id: string }
   });
   if (!linea || !puedeVer(sesion, linea)) notFound();
   const editar = puedeEditar(sesion, linea);
+  const textoComentario = linea.origen === "PREVENTIVO" ? textoDetalle(linea) : linea.comentario;
   const otros = linea.vin
     ? await prisma.linea.findMany({ where: { vin: linea.vin, NOT: { id: linea.id } }, include: { centro: true } })
     : [];
@@ -58,15 +61,26 @@ export default async function Ficha({ params }: { params: Promise<{ id: string }
         <form action={guardarComentario.bind(null, linea.id)} className="mt-6">
           <label className="block text-sm font-medium">
             Comentario
-            <textarea name="comentario" defaultValue={linea.comentario} rows={4} disabled={!editar} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
+            <textarea name="comentario" defaultValue={textoComentario} rows={4} disabled={!editar} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
           </label>
-          <p className="mt-1 text-xs text-slate-500">
-            {linea.comentarioAt
-              ? `${linea.comentarioUser?.name ?? "Alguien"} · ${linea.comentarioAt.toLocaleString("es-ES", { timeZone: "Europe/Madrid" })}`
-              : "Sin comentario"}
-          </p>
+          {linea.comentarioAt ? (
+            <p className="mt-1 text-xs text-slate-500">
+              {linea.comentarioUser?.name ?? "Alguien"} · {linea.comentarioAt.toLocaleString("es-ES", { timeZone: "Europe/Madrid" })}
+            </p>
+          ) : textoComentario ? null : (
+            <p className="mt-1 text-xs text-slate-500">Sin comentario</p>
+          )}
           {editar ? <button className="mt-2 rounded-md bg-slate-900 px-3 py-1.5 text-sm text-white" type="submit">Guardar comentario</button> : null}
         </form>
+
+        {linea.origen === "PREVENTIVO" ? (
+          <MarcarDesplazado
+            key={String(linea.desplazado)}
+            marcado={linea.desplazado}
+            editar={editar}
+            action={marcarDesplazado.bind(null, linea.id)}
+          />
+        ) : null}
 
         <form action={cambiarCentro.bind(null, linea.id)} className="mt-6 flex items-end gap-2">
           <label className="text-sm font-medium">

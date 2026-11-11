@@ -1,0 +1,1 @@
+ALTER TABLE "Linea" ADD COLUMN "desplazado" BOOLEAN NOT NULL DEFAULT false;
