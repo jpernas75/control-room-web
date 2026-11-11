@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ElegirCentro } from "@/components/ElegirCentro";
 import { Nav } from "@/components/Nav";
 import { marcasDeLinea, mesesConMarcas, type Marca } from "@/domain/calendario";
 import { listarLineas } from "@/lib/lineas";
@@ -26,8 +27,9 @@ export default async function Calendario({
   const sp = await searchParams;
   const centros = await prisma.centro.findMany({ orderBy: { nombre: "asc" } });
   const todas = await listarLineas(sesion);
-  const centroId = sesion.role === "CENTRO" ? sesion.centroId : sp.centro || centros[0]?.id || "";
-  const delCentro = todas.filter((l) => l.centroId === centroId);
+  const verTodos = sesion.role === "ADMIN" && sp.centro === "todos";
+  const centroId = sesion.role === "CENTRO" ? sesion.centroId : verTodos ? "" : sp.centro || centros[0]?.id || "";
+  const delCentro = verTodos ? todas : todas.filter((l) => l.centroId === centroId);
   const marcas = delCentro.flatMap((l) =>
     marcasDeLinea(
       {
@@ -46,7 +48,8 @@ export default async function Calendario({
   const hoy = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Madrid" }).slice(0, 7);
   const mes = sp.mes && meses.includes(sp.mes) ? sp.mes : meses.at(-1) ?? hoy;
   const idx = meses.indexOf(mes);
-  const href = (m: string) => `/calendario?centro=${centroId}&mes=${m}`;
+  const centroParam = verTodos ? "todos" : centroId ?? "";
+  const href = (m: string) => `/calendario?centro=${centroParam}&mes=${m}`;
 
   return (
     <>
@@ -54,14 +57,7 @@ export default async function Calendario({
     <main className="mx-auto w-full max-w-[1600px] px-4 py-6 lg:px-6">
       <div className="mb-4 flex flex-wrap items-center gap-3">
         {sesion.role === "ADMIN" ? (
-          <form>
-            <select name="centro" defaultValue={centroId ?? ""} className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
-              {centros.map((c) => (
-                <option key={c.id} value={c.id}>{c.nombre}</option>
-              ))}
-            </select>
-            <button className="ml-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm" type="submit">Ver</button>
-          </form>
+          <ElegirCentro centro={centroParam} mes={mes} opciones={centros.map((c) => ({ id: c.id, nombre: c.nombre }))} />
         ) : null}
         {idx > 0 ? <Link className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm" href={href(meses[idx - 1])}>Anterior</Link> : null}
         <strong>{mes}</strong>
@@ -69,7 +65,7 @@ export default async function Calendario({
           <Link className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm" href={href(meses[idx + 1])}>Siguiente</Link>
         ) : null}
         <form action="/calendario" className="flex items-center gap-2">
-          <input type="hidden" name="centro" value={centroId ?? ""} />
+          <input type="hidden" name="centro" value={centroParam} />
           <select name="mes" defaultValue={mes} className="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm">
             {(meses.length ? meses : [mes]).map((m) => (
               <option key={m}>{m}</option>
@@ -78,7 +74,11 @@ export default async function Calendario({
           <button className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm" type="submit">Ir</button>
         </form>
       </div>
-      {marcas.length === 0 ? <p className="text-sm text-slate-600">Este centro no tiene citas ni órdenes en el calendario.</p> : null}
+      {marcas.length === 0 ? (
+        <p className="text-sm text-slate-600">
+          {verTodos ? "No hay citas ni órdenes en el calendario." : "Este centro no tiene citas ni órdenes en el calendario."}
+        </p>
+      ) : null}
       <Mes mes={mes} marcas={marcas} />
     </main>
     </>

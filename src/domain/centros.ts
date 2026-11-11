@@ -11,6 +11,14 @@ export const USUARIO_CENTRO: Record<string, CentroNombre> = {
   lugo: "Lugo",
 };
 
+const NOMBRE_CUENTA: Partial<Record<CentroNombre, string>> = {
+  Porriño: "Vigo",
+};
+
+export function nombreCuenta(centro: CentroNombre): string {
+  return NOMBRE_CUENTA[centro] ?? centro;
+}
+
 const ALIAS: Record<string, CentroNombre> = {
   sada: "Sada",
   coruna: "Sada",

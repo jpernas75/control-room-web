@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
-import { CENTROS, USUARIO_CENTRO } from "../src/domain/centros";
+import { CENTROS, nombreCuenta, USUARIO_CENTRO } from "../src/domain/centros";
 
 const prisma = new PrismaClient();
 
@@ -17,8 +17,8 @@ async function main() {
     centros.set(slug, centro.id);
     await prisma.user.upsert({
       where: { username: slug },
-      update: { name: nombre, role: "CENTRO", centroId: centro.id },
-      create: { username: slug, name: nombre, role: "CENTRO", centroId: centro.id },
+      update: { name: nombreCuenta(nombre), role: "CENTRO", centroId: centro.id },
+      create: { username: slug, name: nombreCuenta(nombre), role: "CENTRO", centroId: centro.id },
     });
   }
 
