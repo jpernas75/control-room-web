@@ -30,6 +30,7 @@ export default async function Calendario({
   const verTodos = sesion.role === "ADMIN" && sp.centro === "todos";
   const centroId = sesion.role === "CENTRO" ? sesion.centroId : verTodos ? "" : sp.centro || centros[0]?.id || "";
   const delCentro = verTodos ? todas : todas.filter((l) => l.centroId === centroId);
+  const fechaHoy = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Madrid" });
   const marcas = delCentro.flatMap((l) =>
     marcasDeLinea(
       {
@@ -41,11 +42,11 @@ export default async function Calendario({
         orFechaCita: l.orFechaCita || null,
         orFechaEntrega: l.orFechaEntrega || null,
       },
-      new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Madrid" }),
+      fechaHoy,
     ).map((m) => ({ ...m, id: l.id, texto: [l.matricula || l.vin, l.cliente].filter(Boolean).join(" · ") })),
   );
   const meses = mesesConMarcas(marcas);
-  const hoy = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Madrid" }).slice(0, 7);
+  const hoy = fechaHoy.slice(0, 7);
   const mes = sp.mes && meses.includes(sp.mes) ? sp.mes : meses.at(-1) ?? hoy;
   const idx = meses.indexOf(mes);
   const centroParam = verTodos ? "todos" : centroId ?? "";
@@ -79,7 +80,7 @@ export default async function Calendario({
           {verTodos ? "No hay citas ni órdenes en el calendario." : "Este centro no tiene citas ni órdenes en el calendario."}
         </p>
       ) : null}
-      <Mes mes={mes} marcas={marcas} />
+      <Mes mes={mes} marcas={marcas} hoy={fechaHoy} />
     </main>
     </>
   );
@@ -88,9 +89,11 @@ export default async function Calendario({
 function Mes({
   mes,
   marcas,
+  hoy,
 }: {
   mes: string;
   marcas: (Marca & { id: string; texto: string })[];
+  hoy: string;
 }) {
   const [y, m] = mes.split("-").map(Number);
   const primero = new Date(Date.UTC(y, m - 1, 1));
@@ -104,10 +107,11 @@ function Mes({
       ))}
       {celdas.map((dia, i) => {
         const iso = dia ? `${mes}-${String(dia).padStart(2, "0")}` : "";
+        const esHoy = iso === hoy;
         const delDia = dia ? marcas.filter((marca) => marca.desde <= iso && marca.hasta >= iso) : [];
         return (
-          <div key={i} className="min-h-24 rounded-md border border-slate-200 bg-white p-1">
-            <div className="text-xs text-slate-400">{dia ?? ""}</div>
+          <div key={i} className={`min-h-24 rounded-md border p-1 ${esHoy ? "border-slate-900 bg-slate-50" : "border-slate-200 bg-white"}`}>
+            <div className={esHoy ? "inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-900 px-1 text-xs font-semibold text-white" : "text-xs text-slate-400"} aria-current={esHoy ? "date" : undefined}>{dia ?? ""}</div>
             {delDia.map((marca, n) => (
               <Link
                 key={`${marca.id}-${n}`}
