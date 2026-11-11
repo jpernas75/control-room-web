@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { Nav } from "@/components/Nav";
 import { CENTROS } from "@/domain/centros";
 import { puedeEditar, puedeVer } from "@/domain/acceso";
 import { prisma } from "@/lib/prisma";
@@ -22,7 +23,9 @@ export default async function Ficha({ params }: { params: Promise<{ id: string }
     : [];
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6">
+    <>
+      <Nav />
+      <main className="mx-auto max-w-3xl px-4 py-6">
       <a className="text-sm text-slate-600 underline" href="/">
         Volver a la bandeja
       </a>
@@ -99,7 +102,8 @@ export default async function Ficha({ params }: { params: Promise<{ id: string }
           <p className="mt-6 text-sm">Cita de ICSS: {linea.orFechaCita}. Fecha prevista guardada: {linea.fechaPrevista || "ninguna"}.</p>
         )}
       </article>
-    </main>
+      </main>
+    </>
   );
 }
 

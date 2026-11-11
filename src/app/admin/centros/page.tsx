@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Nav } from "@/components/Nav";
 import { prisma } from "@/lib/prisma";
 import { sesionActual } from "@/lib/sesion";
 import { guardarClave } from "./actions";
@@ -11,7 +12,9 @@ export default async function Centros() {
   if (sesion.role !== "ADMIN") redirect("/");
   const usuarios = await prisma.user.findMany({ where: { role: "CENTRO" }, orderBy: { username: "asc" } });
   return (
-    <main className="mx-auto max-w-xl px-4 py-6">
+    <>
+      <Nav />
+      <main className="mx-auto max-w-xl px-4 py-6">
       <h1 className="text-2xl font-semibold">Claves de centro</h1>
       <p className="mt-1 text-sm text-slate-600">La cuenta es el nombre en minúsculas. La clave nueva tiene al menos 8 caracteres.</p>
       <ul className="mt-4 space-y-3">
@@ -29,6 +32,7 @@ export default async function Centros() {
           </li>
         ))}
       </ul>
-    </main>
+      </main>
+    </>
   );
 }

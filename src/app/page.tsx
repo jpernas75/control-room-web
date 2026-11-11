@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { Bandeja, type FilaBandeja } from "@/components/Bandeja";
+import { Nav } from "@/components/Nav";
 import { listarLineas } from "@/lib/lineas";
 import { sesionActual } from "@/lib/sesion";
 
@@ -30,5 +31,10 @@ export default async function PaginaBandeja() {
     orUrl: l.orUrl,
     orFechaCita: l.orFechaCita,
   }));
-  return <Bandeja filas={filas} />;
+  return (
+    <>
+      <Nav />
+      <Bandeja filas={filas} />
+    </>
+  );
 }

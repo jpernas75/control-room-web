@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Nav } from "@/components/Nav";
 import { marcasDeLinea, mesesConMarcas, type Marca } from "@/domain/calendario";
 import { listarLineas } from "@/lib/lineas";
 import { prisma } from "@/lib/prisma";
@@ -48,6 +49,8 @@ export default async function Calendario({
   const href = (m: string) => `/calendario?centro=${centroId}&mes=${m}`;
 
   return (
+    <>
+    <Nav />
     <main className="mx-auto w-full max-w-[1600px] px-4 py-6 lg:px-6">
       <div className="mb-4 flex flex-wrap items-center gap-3">
         {sesion.role === "ADMIN" ? (
@@ -78,6 +81,7 @@ export default async function Calendario({
       {marcas.length === 0 ? <p className="text-sm text-slate-600">Este centro no tiene citas ni órdenes en el calendario.</p> : null}
       <Mes mes={mes} marcas={marcas} />
     </main>
+    </>
   );
 }
 
