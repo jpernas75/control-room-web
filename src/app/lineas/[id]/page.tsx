@@ -43,10 +43,10 @@ export default async function Ficha({
         Volver a la bandeja
       </Link>
       <article className="mt-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="text-xl font-semibold">{linea.expedienteId || linea.vin}</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="text-xl font-semibold">
           {linea.origen === "PREVENTIVO" ? "Preventivo" : "Control Room"} · {linea.centro?.nombre ?? "Sin centro"} · {linea.cliente}
-        </p>
+        </h1>
+        <p className="mt-1 text-sm text-slate-600">{linea.expedienteId || linea.vin}</p>
         <dl className="mt-4 grid gap-2 text-sm">
           <Dato k="VIN" v={linea.vin} />
           <Dato k="Matrícula" v={linea.matricula} />
@@ -142,7 +142,7 @@ export default async function Ficha({
               </label>
               {editar ? <button className="rounded-md border border-slate-300 px-3 py-2 text-sm" type="submit">Guardar fecha</button> : null}
             </div>
-            <p className="mt-1 text-xs text-slate-500">Para que la fecha sea válida crear una cita en CAR</p>
+            <p className="mt-1 text-xs text-red-600">Para que la fecha sea válida crear una cita en CAR</p>
           </form>
         )}
       </article>
