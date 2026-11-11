@@ -16,10 +16,14 @@ export type FilaBandeja = {
   detalle: string;
   situacionKey: string;
   situacionTexto: string;
-  fase: string;
   estadoIcss: string;
-  pago: string;
   fechaIso: string;
+  orCita: boolean;
+  orNumero: string;
+  orId: string;
+  orEstado: string;
+  orUrl: string;
+  orFechaCita: string;
 };
 
 const AVISO: Record<string, string> = {
@@ -46,17 +50,15 @@ const ORDEN_SIT: Record<string, number> = {
   deshabilitada: 8,
 };
 
-type SortKey = "situacion" | "ref" | "centro" | "cliente" | "vehiculo" | "detalle" | "fecha";
+type SortKey = "situacion" | "ref" | "centro" | "cliente" | "vehiculo" | "detalle" | "fecha" | "or" | "estado";
 
 type FiltroCr = {
   situacion: string;
-  fase: string;
   estado: string;
-  pago: string;
   detalle: string;
 };
 
-const FILTRO_VACIO: FiltroCr = { situacion: "", fase: "", estado: "", pago: "", detalle: "" };
+const FILTRO_INICIAL: FiltroCr = { situacion: "", estado: "Open", detalle: "" };
 
 function cmp(a: string, b: string): number {
   return a.localeCompare(b, "es", { sensitivity: "base" });
@@ -69,7 +71,31 @@ function valor(fila: FilaBandeja, key: SortKey): string | number {
   if (key === "cliente") return fila.cliente;
   if (key === "vehiculo") return fila.vehiculo;
   if (key === "fecha") return fila.fechaIso;
+  if (key === "estado") return fila.estadoIcss;
+  if (key === "or") return claveOr(fila);
   return fila.detalle;
+}
+
+function fechaVisible(iso: string): string {
+  const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?/);
+  if (!m) return iso;
+  const dia = `${m[3]}/${m[2]}/${m[1]}`;
+  return m[4] ? `${dia} ${m[4]}:${m[5]}` : dia;
+}
+
+function fechaCorta(iso: string): string {
+  const m = iso.match(/(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[3]}/${m[2]}` : "";
+}
+
+function tieneOr(fila: FilaBandeja): boolean {
+  return Boolean(fila.orNumero.trim() || fila.orId.trim());
+}
+
+function claveOr(fila: FilaBandeja): string {
+  if (fila.orCita) return `1 ${fila.orFechaCita}`;
+  if (tieneOr(fila)) return `2 ${fila.orNumero || fila.orId}`;
+  return "0";
 }
 
 function ordenar(filas: FilaBandeja[], key: SortKey, dir: "asc" | "desc"): FilaBandeja[] {
@@ -95,8 +121,8 @@ export function Bandeja({ filas }: { filas: FilaBandeja[] }) {
   const [centros, setCentros] = useState<string[]>([]);
   const [ocultarDeshabilitadas, setOcultarDeshabilitadas] = useState(false);
   const [ocultarAlertas, setOcultarAlertas] = useState(false);
-  const [filtro, setFiltro] = useState<FiltroCr>(FILTRO_VACIO);
-  const [sortCr, setSortCr] = useState<{ key: SortKey; dir: "asc" | "desc" }>({ key: "situacion", dir: "asc" });
+  const [filtro, setFiltro] = useState<FiltroCr>(FILTRO_INICIAL);
+  const [sortCr, setSortCr] = useState<{ key: SortKey; dir: "asc" | "desc" }>({ key: "fecha", dir: "desc" });
   const [sortPrev, setSortPrev] = useState<{ key: SortKey; dir: "asc" | "desc" }>({ key: "situacion", dir: "asc" });
 
   const centrosVisibles = useMemo(() => {
@@ -119,25 +145,19 @@ export function Bandeja({ filas }: { filas: FilaBandeja[] }) {
   const opciones = useMemo(
     () => ({
       situacion: unicos(roomsBase, (f) => f.situacionTexto),
-      fase: unicos(roomsBase, (f) => f.fase),
       estado: unicos(roomsBase, (f) => f.estadoIcss),
-      pago: unicos(roomsBase, (f) => f.pago),
       detalle: unicos(roomsBase, (f) => f.detalle),
     }),
     [roomsBase],
   );
   const situacion = opciones.situacion.includes(filtro.situacion) ? filtro.situacion : "";
-  const fase = opciones.fase.includes(filtro.fase) ? filtro.fase : "";
   const estado = opciones.estado.includes(filtro.estado) ? filtro.estado : "";
-  const pago = opciones.pago.includes(filtro.pago) ? filtro.pago : "";
   const detalle = opciones.detalle.includes(filtro.detalle) ? filtro.detalle : "";
 
   const rooms = ordenar(
     roomsBase.filter((f) => {
       if (situacion && f.situacionTexto !== situacion) return false;
-      if (fase && f.fase !== fase) return false;
       if (estado && f.estadoIcss !== estado) return false;
-      if (pago && f.pago !== pago) return false;
       if (detalle && f.detalle !== detalle) return false;
       return true;
     }),
@@ -160,7 +180,7 @@ export function Bandeja({ filas }: { filas: FilaBandeja[] }) {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-6">
+    <main className="mx-auto max-w-7xl px-4 py-6">
       <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Filtrar por centro">
         <button
           type="button"
@@ -191,8 +211,6 @@ export function Bandeja({ filas }: { filas: FilaBandeja[] }) {
         <div className="flex flex-wrap items-end gap-3 border-b border-slate-100 px-4 py-3">
           <SelectFiltro label="Situación" value={situacion} options={opciones.situacion} onChange={(value) => setFiltro({ ...filtro, situacion: value })} />
           <SelectFiltro label="Estado" value={estado} options={opciones.estado} onChange={(value) => setFiltro({ ...filtro, estado: value })} />
-          <SelectFiltro label="Fase" value={fase} options={opciones.fase} onChange={(value) => setFiltro({ ...filtro, fase: value })} />
-          <SelectFiltro label="Pago" value={pago} options={opciones.pago} onChange={(value) => setFiltro({ ...filtro, pago: value })} />
           <SelectFiltro label="Detalle" value={detalle} options={opciones.detalle} largo onChange={(value) => setFiltro({ ...filtro, detalle: value })} />
         </div>
         <Tabla
@@ -201,6 +219,7 @@ export function Bandeja({ filas }: { filas: FilaBandeja[] }) {
           onSort={(key) => onSort("cr", key)}
           refLabel="Expediente"
           vacio="No hay Control Room con estos filtros."
+          controlRoom
         />
       </section>
 
@@ -264,30 +283,37 @@ function Tabla({
   onSort,
   refLabel,
   vacio,
+  controlRoom = false,
 }: {
   filas: FilaBandeja[];
   sort: { key: SortKey; dir: "asc" | "desc" };
   onSort: (key: SortKey) => void;
   refLabel: string;
   vacio: string;
+  controlRoom?: boolean;
 }) {
+  const columnas = controlRoom ? 10 : 7;
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[880px] text-left text-sm">
+      <table className={`w-full text-left text-sm ${controlRoom ? "min-w-[1100px]" : "min-w-[880px]"}`}>
         <thead className="bg-slate-50 text-xs text-slate-600">
           <tr>
+            {controlRoom ? <SortTh label="Fecha" sortKey="fecha" sort={sort} onSort={onSort} /> : null}
             <SortTh label="Situación" sortKey="situacion" sort={sort} onSort={onSort} />
             <SortTh label={refLabel} sortKey="ref" sort={sort} onSort={onSort} />
             <SortTh label="Centro" sortKey="centro" sort={sort} onSort={onSort} />
             <SortTh label="Cliente" sortKey="cliente" sort={sort} onSort={onSort} />
             <SortTh label="Vehículo" sortKey="vehiculo" sort={sort} onSort={onSort} />
             <SortTh label="Detalle" sortKey="detalle" sort={sort} onSort={onSort} />
+            {controlRoom ? <SortTh label="OR CAR" sortKey="or" sort={sort} onSort={onSort} /> : null}
+            {controlRoom ? <SortTh label="Estado" sortKey="estado" sort={sort} onSort={onSort} /> : null}
             <th className="sticky right-0 bg-slate-50 px-3 py-2 shadow-[-6px_0_8px_-6px_rgba(15,23,42,0.2)]" />
           </tr>
         </thead>
         <tbody>
           {filas.map((f) => (
             <tr key={f.id} className="border-t border-slate-100">
+              {controlRoom ? <td className="whitespace-nowrap px-3 py-2 tabular-nums">{fechaVisible(f.fechaIso)}</td> : null}
               <td className="px-3 py-2">
                 <span className={`rounded px-2 py-0.5 text-xs font-medium ${AVISO[f.situacionKey] ?? "bg-slate-100"}`}>
                   {f.situacionTexto}
@@ -298,6 +324,12 @@ function Tabla({
               <td className="max-w-[12rem] truncate px-3 py-2" title={f.cliente}>{f.cliente}</td>
               <td className="px-3 py-2">{f.vehiculo}</td>
               <td className="max-w-[18rem] truncate px-3 py-2 text-slate-600" title={f.detalle}>{f.detalle}</td>
+              {controlRoom ? (
+                <td className="px-3 py-2">
+                  <CeldaOr fila={f} />
+                </td>
+              ) : null}
+              {controlRoom ? <td className="whitespace-nowrap px-3 py-2">{f.estadoIcss || "—"}</td> : null}
               <td className="sticky right-0 bg-white px-3 py-2 shadow-[-6px_0_8px_-6px_rgba(15,23,42,0.25)]">
                 <Link href={`/lineas/${f.id}`} className="inline-block rounded bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800">
                   Gestionar
@@ -307,7 +339,7 @@ function Tabla({
           ))}
           {filas.length === 0 ? (
             <tr>
-              <td className="px-3 py-6 text-slate-500" colSpan={7}>
+              <td className="px-3 py-6 text-slate-500" colSpan={columnas}>
                 {vacio}
               </td>
             </tr>
@@ -316,6 +348,35 @@ function Tabla({
       </table>
     </div>
   );
+}
+
+function CeldaOr({ fila }: { fila: FilaBandeja }) {
+  if (fila.orCita) {
+    const fecha = fechaCorta(fila.orFechaCita);
+    return (
+      <span className="whitespace-nowrap">
+        <span className="rounded bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-950">Cita</span>
+        {fecha ? <span className="ml-1 tabular-nums">{fecha}</span> : null}
+      </span>
+    );
+  }
+  if (tieneOr(fila)) {
+    const numero = fila.orNumero || fila.orId;
+    const enlace = fila.orUrl ? (
+      <a className="font-medium underline" href={fila.orUrl} target="_blank" rel="noopener noreferrer">
+        {numero}
+      </a>
+    ) : (
+      <span className="font-medium">{numero}</span>
+    );
+    return (
+      <span className="block whitespace-nowrap">
+        {enlace}
+        {fila.orEstado ? <span className="block text-xs text-slate-500">{fila.orEstado}</span> : null}
+      </span>
+    );
+  }
+  return <span className="text-slate-400">Sin Cita/OR</span>;
 }
 
 function SortTh({

@@ -21,10 +21,14 @@ export default async function PaginaBandeja() {
     detalle: l.origen === "PREVENTIVO" ? l.obs || l.trigger : l.prediagnostico,
     situacionKey: l.situacion.key,
     situacionTexto: l.situacion.texto,
-    fase: l.fase,
     estadoIcss: l.estadoIcss,
-    pago: l.pago,
     fechaIso: l.fechaIso,
+    orCita: l.orCita,
+    orNumero: l.orNumero,
+    orId: l.orId,
+    orEstado: l.orEstado,
+    orUrl: l.orUrl,
+    orFechaCita: l.orFechaCita,
   }));
   return <Bandeja filas={filas} />;
 }
