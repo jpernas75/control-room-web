@@ -1,4 +1,4 @@
-export const CLAVES_ORDEN = ["situacion", "ref", "centro", "cliente", "vehiculo", "detalle", "fecha", "or", "estado", "desplazado"] as const;
+export const CLAVES_ORDEN = ["situacion", "ref", "centro", "cliente", "vehiculo", "detalle", "fecha", "or", "estado", "desplazado", "solicitud"] as const;
 
 export type ClaveOrden = (typeof CLAVES_ORDEN)[number];
 

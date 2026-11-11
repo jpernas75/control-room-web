@@ -26,6 +26,8 @@ export type FilaBandeja = {
   orUrl: string;
   orFechaCita: string;
   desplazado: boolean;
+  solicitarCr: boolean;
+  fechaPrevista: string;
 };
 
 const AVISO: Record<string, string> = {
@@ -74,6 +76,7 @@ function valor(fila: FilaBandeja, key: SortKey): string | number {
   if (key === "estado") return fila.estadoIcss;
   if (key === "or") return claveOr(fila);
   if (key === "desplazado") return fila.desplazado ? "1" : "0";
+  if (key === "solicitud") return fila.solicitarCr ? `1 ${fila.fechaPrevista}` : "0";
   return fila.detalle;
 }
 
@@ -340,38 +343,41 @@ function Tabla({
   controlRoom?: boolean;
   volver: string;
 }) {
-  const columnas = controlRoom ? 10 : 8;
+  const columnas = controlRoom ? 10 : 7;
   return (
     <div className="overflow-x-auto">
       <table className={`w-full text-left text-xs ${controlRoom ? "min-w-[1100px]" : "min-w-[880px]"}`}>
         <thead className="bg-slate-50 text-xs text-slate-600">
           <tr>
-            {controlRoom ? <SortTh label="Fecha" sortKey="fecha" sort={sort} onSort={onSort} /> : null}
-            <SortTh label="Situación" sortKey="situacion" sort={sort} onSort={onSort} />
+            {controlRoom ? <SortTh label="Fecha" sortKey="fecha" sort={sort} onSort={onSort} /> : <SortTh label="Centro" sortKey="centro" sort={sort} onSort={onSort} />}
+            {controlRoom ? <SortTh label="Situación" sortKey="situacion" sort={sort} onSort={onSort} /> : null}
             <SortTh label={refLabel} sortKey="ref" sort={sort} onSort={onSort} />
-            <SortTh label="Centro" sortKey="centro" sort={sort} onSort={onSort} />
+            {controlRoom ? <SortTh label="Centro" sortKey="centro" sort={sort} onSort={onSort} /> : null}
             <SortTh label="Cliente" sortKey="cliente" sort={sort} onSort={onSort} />
-            <SortTh label="Vehículo" sortKey="vehiculo" sort={sort} onSort={onSort} />
+            {controlRoom ? <SortTh label="Vehículo" sortKey="vehiculo" sort={sort} onSort={onSort} /> : null}
             <SortTh label="Detalle" sortKey="detalle" sort={sort} onSort={onSort} />
             {controlRoom ? <SortTh label="OR CAR" sortKey="or" sort={sort} onSort={onSort} /> : null}
             {controlRoom ? <SortTh label="Estado" sortKey="estado" sort={sort} onSort={onSort} /> : null}
             {controlRoom ? null : <SortTh label="Desplazado" sortKey="desplazado" sort={sort} onSort={onSort} />}
+            {controlRoom ? null : <SortTh label="Solicitar Control Room" sortKey="solicitud" sort={sort} onSort={onSort} />}
             <th className="sticky right-0 bg-slate-50 px-3 py-2 shadow-[-6px_0_8px_-6px_rgba(15,23,42,0.2)]" />
           </tr>
         </thead>
         <tbody>
           {filas.map((f) => (
             <tr key={f.id} className="border-t border-slate-100">
-              {controlRoom ? <td className="whitespace-nowrap px-3 py-2 tabular-nums">{fechaVisible(f.fechaIso)}</td> : null}
-              <td className="px-3 py-2">
-                <span className={`rounded px-2 py-0.5 text-xs font-medium ${AVISO[f.situacionKey] ?? "bg-slate-100"}`}>
-                  {f.situacionTexto}
-                </span>
-              </td>
+              {controlRoom ? <td className="whitespace-nowrap px-3 py-2 tabular-nums">{fechaVisible(f.fechaIso)}</td> : <td className="px-3 py-2">{f.centro}</td>}
+              {controlRoom ? (
+                <td className="px-3 py-2">
+                  <span className={`rounded px-2 py-0.5 text-xs font-medium ${AVISO[f.situacionKey] ?? "bg-slate-100"}`}>
+                    {f.situacionTexto}
+                  </span>
+                </td>
+              ) : null}
               <td className="px-3 py-2 font-medium">{f.expedienteId || f.vin}</td>
-              <td className="px-3 py-2">{f.centro}</td>
+              {controlRoom ? <td className="px-3 py-2">{f.centro}</td> : null}
               <td className="max-w-[12rem] truncate px-3 py-2" title={f.cliente}>{f.cliente}</td>
-              <td className="px-3 py-2">{f.vehiculo}</td>
+              {controlRoom ? <td className="px-3 py-2">{f.vehiculo}</td> : null}
               <td className="max-w-[18rem] truncate px-3 py-2 text-slate-600" title={f.detalle}>{f.detalle}</td>
               {controlRoom ? (
                 <td className="px-3 py-2">
@@ -380,6 +386,11 @@ function Tabla({
               ) : null}
               {controlRoom ? <td className="whitespace-nowrap px-3 py-2">{f.estadoIcss || "—"}</td> : null}
               {controlRoom ? null : <td className="px-3 py-2">{f.desplazado ? "Sí" : "No"}</td>}
+              {controlRoom ? null : (
+                <td className="whitespace-nowrap px-3 py-2">
+                  <CeldaSolicitud fila={f} />
+                </td>
+              )}
               <td className="sticky right-0 bg-white px-3 py-2 shadow-[-6px_0_8px_-6px_rgba(15,23,42,0.25)]">
                 <Link href={volver ? `/lineas/${f.id}?volver=${encodeURIComponent(volver)}` : `/lineas/${f.id}`} className="inline-block rounded bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800">
                   Gestionar
@@ -398,6 +409,12 @@ function Tabla({
       </table>
     </div>
   );
+}
+
+function CeldaSolicitud({ fila }: { fila: FilaBandeja }) {
+  if (!fila.solicitarCr) return <span className="text-slate-400">No</span>;
+  const fecha = fila.fechaPrevista ? fechaVisible(fila.fechaPrevista) : "";
+  return <span>{fecha ? `Sí · ${fecha}` : "Sí"}</span>;
 }
 
 function CeldaOr({ fila }: { fila: FilaBandeja }) {
