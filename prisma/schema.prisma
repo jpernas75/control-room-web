@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CENTRO
+}
+
+enum Origen {
+  PREVENTIVO
+  CONTROL_ROOM
+}
+
+enum Presencia {
+  ACTIVA
+  DESHABILITADA
+  ALERTA
+}
+
+enum TipoImport {
+  JSON
+  EXCEL
+}
+
+model User {
+  id           String         @id @default(cuid())
+  username     String         @unique
+  passwordHash String?
+  name         String
+  role         Role
+  centroId     String?
+  centro       Centro?        @relation(fields: [centroId], references: [id])
+  comentarios  Linea[]        @relation("comentario")
+  cambios      CambioCentro[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model Centro {
+  id     String  @id @default(cuid())
+  nombre String  @unique
+  slug   String  @unique
+  users  User[]
+  lineas Linea[]
+}
+
+model Linea {
+  id               String     @id @default(cuid())
+  origen           Origen
+  presencia        Presencia  @default(ACTIVA)
+  expedienteId     String?    @unique
+  vin              String     @default("")
+  centroId         String?
+  centro           Centro?    @relation(fields: [centroId], references: [id])
+  centroManual     Boolean    @default(false)
+  cliente          String     @default("")
+  matricula        String     @default("")
+  modelo           String     @default("")
+  km               String     @default("")
+  prediagnostico   String     @default("")
+  fase             String     @default("")
+  estadoIcss       String     @default("")
+  fechaIso         String     @default("")
+  abierto          Boolean    @default(false)
+  pago             String     @default("")
+  cuenta           String     @default("")
+  vco              Boolean    @default(false)
+  orId             String     @default("")
+  orNumero         String     @default("")
+  orEstado         String     @default("")
+  orUrl            String     @default("")
+  orFecha          String     @default("")
+  orFechaCita      String     @default("")
+  orFechaEntrega   String     @default("")
+  orCita           Boolean    @default(false)
+  trigger          String     @default("")
+  obs              String     @default("")
+  dealer           String     @default("")
+  comentario       String     @default("")
+  comentarioUserId String?
+  comentarioUser   User?      @relation("comentario", fields: [comentarioUserId], references: [id])
+  comentarioAt     DateTime?
+  fechaPrevista    String?
+  cambios          CambioCentro[]
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  @@index([vin])
+  @@index([centroId, origen])
+}
+
+model CambioCentro {
+  id        String   @id @default(cuid())
+  lineaId   String
+  linea     Linea    @relation(fields: [lineaId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  desde     String
+  hacia     String
+  createdAt DateTime @default(now())
+}
+
+model ImportBatch {
+  id        String     @id @default(cuid())
+  tipo      TipoImport
+  resumen   Json
+  createdAt DateTime   @default(now())
+}
