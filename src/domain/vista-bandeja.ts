@@ -25,7 +25,7 @@ export const VISTA_INICIAL: VistaBandeja = {
   detalle: "",
   busqueda: "",
   ordenCr: { key: "fecha", dir: "desc" },
-  ordenPrev: { key: "situacion", dir: "asc" },
+  ordenPrev: { key: "cliente", dir: "asc" },
 };
 
 type Consulta = URLSearchParams | Record<string, string | string[] | undefined>;
