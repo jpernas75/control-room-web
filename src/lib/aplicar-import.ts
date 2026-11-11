@@ -74,6 +74,7 @@ export async function aplicarJson(payload: unknown) {
   const plan = planImportJson(payload, lineas.map(conocida));
   if (!plan.ok) return plan;
   await prisma.$transaction(async (tx) => {
+    await tx.linea.updateMany({ where: { origen: "CONTROL_ROOM" }, data: { esNuevo: false } });
     for (const accion of plan.acciones) {
       if (accion.tipo === "deshabilitar") {
         await tx.linea.update({ where: { id: accion.lineaId }, data: { presencia: "DESHABILITADA" } });
@@ -83,15 +84,16 @@ export async function aplicarJson(payload: unknown) {
       const base = camposCr(datos);
       const centroId = await idCentro(datos.centroResuelto);
       if (accion.tipo === "upsert_cr" && !accion.lineaId) {
-        await tx.linea.create({ data: { ...base, centroId, centroManual: false } });
+        await tx.linea.create({ data: { ...base, centroId, centroManual: false, esNuevo: true } });
         continue;
       }
       if (accion.tipo === "upsert_cr" || accion.tipo === "convertir") {
         const id = accion.tipo === "convertir" ? accion.lineaId : accion.lineaId!;
         const actual = await tx.linea.findUnique({ where: { id } });
+        const campos = actual?.centroManual ? base : { ...base, centroId };
         await tx.linea.update({
           where: { id },
-          data: actual?.centroManual ? base : { ...base, centroId },
+          data: accion.tipo === "convertir" ? { ...campos, esNuevo: true } : campos,
         });
         continue;
       }
@@ -143,6 +145,7 @@ export async function aplicarExcel(buffer: Buffer) {
   const lineas = await prisma.linea.findMany();
   const acciones = planImportExcel(leido.filas, lineas.map(conocida));
   await prisma.$transaction(async (tx) => {
+    await tx.linea.updateMany({ where: { origen: "PREVENTIVO" }, data: { esNuevo: false } });
     for (const accion of acciones) {
       if (accion.tipo === "alerta_preventivo") {
         await tx.linea.update({ where: { id: accion.lineaId }, data: { presencia: "ALERTA" } });
@@ -155,7 +158,7 @@ export async function aplicarExcel(buffer: Buffer) {
       const centroId = await idCentro(accion.datos.centroResuelto);
       if (accion.tipo === "crear_preventivo") {
         await tx.linea.create({
-          data: { ...camposPreventivo(accion.datos, centroId), origen: "PREVENTIVO", presencia: "ACTIVA", centroManual: false },
+          data: { ...camposPreventivo(accion.datos, centroId), origen: "PREVENTIVO", presencia: "ACTIVA", centroManual: false, esNuevo: true },
         });
         continue;
       }

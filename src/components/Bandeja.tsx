@@ -28,6 +28,7 @@ export type FilaBandeja = {
   desplazado: boolean;
   solicitarCr: boolean;
   fechaPrevista: string;
+  nuevo: boolean;
 };
 
 const AVISO: Record<string, string> = {
@@ -365,8 +366,18 @@ function Tabla({
         </thead>
         <tbody>
           {filas.map((f) => (
-            <tr key={f.id} className="border-t border-slate-100">
-              {controlRoom ? <td className="whitespace-nowrap px-3 py-2 tabular-nums">{fechaVisible(f.fechaIso)}</td> : <td className="px-3 py-2">{f.centro}</td>}
+            <tr key={f.id} className={`border-t ${f.nuevo ? "border-emerald-100 bg-emerald-50" : "border-slate-100"}`}>
+              {controlRoom ? (
+                <td className="whitespace-nowrap px-3 py-2 tabular-nums">
+                  <MarcaNuevo nuevo={f.nuevo} />
+                  {fechaVisible(f.fechaIso)}
+                </td>
+              ) : (
+                <td className="whitespace-nowrap px-3 py-2">
+                  <MarcaNuevo nuevo={f.nuevo} />
+                  {f.centro}
+                </td>
+              )}
               {controlRoom ? (
                 <td className="px-3 py-2">
                   <span className={`rounded px-2 py-0.5 text-xs font-medium ${AVISO[f.situacionKey] ?? "bg-slate-100"}`}>
@@ -385,13 +396,13 @@ function Tabla({
                 </td>
               ) : null}
               {controlRoom ? <td className="whitespace-nowrap px-3 py-2">{f.estadoIcss || "—"}</td> : null}
-              {controlRoom ? null : <td className="px-3 py-2">{f.desplazado ? "Sí" : "No"}</td>}
+              {controlRoom ? null : <td className="px-3 py-2">{f.desplazado ? "Sí" : ""}</td>}
               {controlRoom ? null : (
                 <td className="whitespace-nowrap px-3 py-2">
                   <CeldaSolicitud fila={f} />
                 </td>
               )}
-              <td className="sticky right-0 bg-white px-3 py-2 shadow-[-6px_0_8px_-6px_rgba(15,23,42,0.25)]">
+              <td className={`sticky right-0 px-3 py-2 shadow-[-6px_0_8px_-6px_rgba(15,23,42,0.25)] ${f.nuevo ? "bg-emerald-50" : "bg-white"}`}>
                 <Link href={volver ? `/lineas/${f.id}?volver=${encodeURIComponent(volver)}` : `/lineas/${f.id}`} className="inline-block rounded bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800">
                   Gestionar
                 </Link>
@@ -411,8 +422,13 @@ function Tabla({
   );
 }
 
+function MarcaNuevo({ nuevo }: { nuevo: boolean }) {
+  if (!nuevo) return null;
+  return <span className="mr-2 rounded bg-emerald-600 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">Nuevo</span>;
+}
+
 function CeldaSolicitud({ fila }: { fila: FilaBandeja }) {
-  if (!fila.solicitarCr) return <span className="text-slate-400">No</span>;
+  if (!fila.solicitarCr) return null;
   const fecha = fila.fechaPrevista ? fechaVisible(fila.fechaPrevista) : "";
   return <span>{fecha ? `Sí · ${fecha}` : "Sí"}</span>;
 }

@@ -39,6 +39,7 @@ export default async function PaginaBandeja({
     orFechaCita: l.orFechaCita,
     desplazado: l.desplazado,
     solicitarCr: l.solicitarCr,
+    nuevo: l.esNuevo,
     fechaPrevista: l.fechaPrevista ?? "",
   }));
   return (

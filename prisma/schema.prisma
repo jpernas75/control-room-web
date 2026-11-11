@@ -88,6 +88,7 @@ model Linea {
   comentarioAt     DateTime?
   desplazado       Boolean    @default(false)
   solicitarCr      Boolean    @default(false)
+  esNuevo          Boolean    @default(false)
   fechaPrevista    String?
   cambios          CambioCentro[]
   createdAt        DateTime   @default(now())
