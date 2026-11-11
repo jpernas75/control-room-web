@@ -24,6 +24,7 @@ export type FilaBandeja = {
   orEstado: string;
   orUrl: string;
   orFechaCita: string;
+  comentario: string;
 };
 
 const AVISO: Record<string, string> = {
@@ -50,7 +51,7 @@ const ORDEN_SIT: Record<string, number> = {
   deshabilitada: 8,
 };
 
-type SortKey = "situacion" | "ref" | "centro" | "cliente" | "vehiculo" | "detalle" | "fecha" | "or" | "estado";
+type SortKey = "situacion" | "ref" | "centro" | "cliente" | "vehiculo" | "detalle" | "fecha" | "or" | "estado" | "comentario";
 
 type FiltroCr = {
   situacion: string;
@@ -73,6 +74,7 @@ function valor(fila: FilaBandeja, key: SortKey): string | number {
   if (key === "fecha") return fila.fechaIso;
   if (key === "estado") return fila.estadoIcss;
   if (key === "or") return claveOr(fila);
+  if (key === "comentario") return fila.comentario;
   return fila.detalle;
 }
 
@@ -310,7 +312,7 @@ function Tabla({
   vacio: string;
   controlRoom?: boolean;
 }) {
-  const columnas = controlRoom ? 10 : 7;
+  const columnas = controlRoom ? 10 : 8;
   return (
     <div className="overflow-x-auto">
       <table className={`w-full text-left text-xs ${controlRoom ? "min-w-[1100px]" : "min-w-[880px]"}`}>
@@ -325,6 +327,7 @@ function Tabla({
             <SortTh label="Detalle" sortKey="detalle" sort={sort} onSort={onSort} />
             {controlRoom ? <SortTh label="OR CAR" sortKey="or" sort={sort} onSort={onSort} /> : null}
             {controlRoom ? <SortTh label="Estado" sortKey="estado" sort={sort} onSort={onSort} /> : null}
+            {controlRoom ? null : <SortTh label="Comentario" sortKey="comentario" sort={sort} onSort={onSort} />}
             <th className="sticky right-0 bg-slate-50 px-3 py-2 shadow-[-6px_0_8px_-6px_rgba(15,23,42,0.2)]" />
           </tr>
         </thead>
@@ -348,6 +351,11 @@ function Tabla({
                 </td>
               ) : null}
               {controlRoom ? <td className="whitespace-nowrap px-3 py-2">{f.estadoIcss || "—"}</td> : null}
+              {controlRoom ? null : (
+                <td className="max-w-[16rem] truncate px-3 py-2 text-slate-600" title={f.comentario}>
+                  {f.comentario}
+                </td>
+              )}
               <td className="sticky right-0 bg-white px-3 py-2 shadow-[-6px_0_8px_-6px_rgba(15,23,42,0.25)]">
                 <Link href={`/lineas/${f.id}`} className="inline-block rounded bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800">
                   Gestionar

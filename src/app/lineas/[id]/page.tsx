@@ -70,7 +70,7 @@ export default async function Ficha({ params }: { params: Promise<{ id: string }
 
         <form action={cambiarCentro.bind(null, linea.id)} className="mt-6 flex items-end gap-2">
           <label className="text-sm font-medium">
-            Centro
+            Reasignar centro
             <select name="centro" defaultValue={linea.centro?.nombre ?? ""} disabled={!editar} className="mt-1 block rounded-md border border-slate-300 px-3 py-2">
               {CENTROS.map((c) => (
                 <option key={c}>{c}</option>
@@ -91,15 +91,18 @@ export default async function Ficha({ params }: { params: Promise<{ id: string }
         ) : null}
 
         {!linea.orFechaCita ? (
-          <form action={guardarFechaPrevista.bind(null, linea.id)} className="mt-6 flex items-end gap-2">
-            <label className="text-sm font-medium">
-              Fecha prevista
-              <input name="fecha" type="date" defaultValue={linea.fechaPrevista ?? ""} disabled={!editar} className="mt-1 block rounded-md border border-slate-300 px-3 py-2" />
-            </label>
-            {editar ? <button className="rounded-md border border-slate-300 px-3 py-2 text-sm" type="submit">Guardar fecha</button> : null}
+          <form action={guardarFechaPrevista.bind(null, linea.id)} className="mt-6">
+            <div className="flex items-end gap-2">
+              <label className="text-sm font-medium">
+                Fecha de llegada prevista
+                <input name="fecha" type="date" defaultValue={linea.fechaPrevista ?? ""} disabled={!editar} className="mt-1 block rounded-md border border-slate-300 px-3 py-2" />
+              </label>
+              {editar ? <button className="rounded-md border border-slate-300 px-3 py-2 text-sm" type="submit">Guardar fecha</button> : null}
+            </div>
+            <p className="mt-1 text-xs text-slate-500">Para que la fecha sea válida crear una cita en CAR</p>
           </form>
         ) : (
-          <p className="mt-6 text-sm">Cita de ICSS: {linea.orFechaCita}. Fecha prevista guardada: {linea.fechaPrevista || "ninguna"}.</p>
+          <p className="mt-6 text-sm">Cita de ICSS: {linea.orFechaCita}. Fecha de llegada prevista: {linea.fechaPrevista || "ninguna"}.</p>
         )}
       </article>
       </main>

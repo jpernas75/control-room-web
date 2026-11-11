@@ -30,6 +30,7 @@ export default async function PaginaBandeja() {
     orEstado: l.orEstado,
     orUrl: l.orUrl,
     orFechaCita: l.orFechaCita,
+    comentario: l.comentario,
   }));
   return (
     <>
