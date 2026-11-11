@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CENTROS } from "@/domain/centros";
+import { consultaDesdeVista, type ClaveOrden, type VistaBandeja } from "@/domain/vista-bandeja";
 
 export type FilaBandeja = {
   id: string;
@@ -51,15 +52,13 @@ const ORDEN_SIT: Record<string, number> = {
   deshabilitada: 8,
 };
 
-type SortKey = "situacion" | "ref" | "centro" | "cliente" | "vehiculo" | "detalle" | "fecha" | "or" | "estado" | "desplazado";
+type SortKey = ClaveOrden;
 
 type FiltroCr = {
   situacion: string;
   estado: string;
   detalle: string;
 };
-
-const FILTRO_INICIAL: FiltroCr = { situacion: "", estado: "Open", detalle: "" };
 
 function cmp(a: string, b: string): number {
   return a.localeCompare(b, "es", { sensitivity: "base" });
@@ -123,14 +122,32 @@ function recortar(texto: string, max: number): string {
   return limpio.length > max ? `${limpio.slice(0, max - 1)}…` : limpio;
 }
 
-export function Bandeja({ filas }: { filas: FilaBandeja[] }) {
-  const [centros, setCentros] = useState<string[]>([]);
-  const [ocultarDeshabilitadas, setOcultarDeshabilitadas] = useState(false);
-  const [ocultarAlertas, setOcultarAlertas] = useState(false);
-  const [filtro, setFiltro] = useState<FiltroCr>(FILTRO_INICIAL);
-  const [busqueda, setBusqueda] = useState("");
-  const [sortCr, setSortCr] = useState<{ key: SortKey; dir: "asc" | "desc" }>({ key: "fecha", dir: "desc" });
-  const [sortPrev, setSortPrev] = useState<{ key: SortKey; dir: "asc" | "desc" }>({ key: "situacion", dir: "asc" });
+export function Bandeja({ filas, inicial }: { filas: FilaBandeja[]; inicial: VistaBandeja }) {
+  const [centros, setCentros] = useState(inicial.centros);
+  const [ocultarDeshabilitadas, setOcultarDeshabilitadas] = useState(inicial.ocultarDeshabilitadas);
+  const [ocultarAlertas, setOcultarAlertas] = useState(inicial.ocultarAlertas);
+  const [filtro, setFiltro] = useState<FiltroCr>({ situacion: inicial.situacion, estado: inicial.estado, detalle: inicial.detalle });
+  const [busqueda, setBusqueda] = useState(inicial.busqueda);
+  const [sortCr, setSortCr] = useState(inicial.ordenCr);
+  const [sortPrev, setSortPrev] = useState(inicial.ordenPrev);
+  const volver = consultaDesdeVista({
+    centros,
+    ocultarDeshabilitadas,
+    ocultarAlertas,
+    situacion: filtro.situacion,
+    estado: filtro.estado,
+    detalle: filtro.detalle,
+    busqueda,
+    ordenCr: sortCr,
+    ordenPrev: sortPrev,
+  });
+
+  useEffect(() => {
+    if (window.location.pathname !== "/") return;
+    const siguiente = volver ? `?${volver}` : "";
+    if (window.location.search === siguiente) return;
+    window.history.replaceState(null, "", siguiente ? `/${siguiente}` : "/");
+  }, [volver]);
 
   const centrosVisibles = useMemo(() => {
     const presentes = new Set(filas.map((f) => f.centro));
@@ -240,6 +257,7 @@ export function Bandeja({ filas }: { filas: FilaBandeja[] }) {
           refLabel="Expediente"
           vacio="No hay Control Room con estos filtros."
           controlRoom
+          volver={volver}
         />
       </section>
 
@@ -253,6 +271,7 @@ export function Bandeja({ filas }: { filas: FilaBandeja[] }) {
           onSort={(key) => onSort("prev", key)}
           refLabel="VIN"
           vacio="No hay preventivos con estos filtros."
+          volver={volver}
         />
       </section>
     </main>
@@ -304,6 +323,7 @@ function Tabla({
   refLabel,
   vacio,
   controlRoom = false,
+  volver,
 }: {
   filas: FilaBandeja[];
   sort: { key: SortKey; dir: "asc" | "desc" };
@@ -311,6 +331,7 @@ function Tabla({
   refLabel: string;
   vacio: string;
   controlRoom?: boolean;
+  volver: string;
 }) {
   const columnas = controlRoom ? 10 : 8;
   return (
@@ -353,7 +374,7 @@ function Tabla({
               {controlRoom ? <td className="whitespace-nowrap px-3 py-2">{f.estadoIcss || "—"}</td> : null}
               {controlRoom ? null : <td className="px-3 py-2">{f.desplazado ? "Sí" : "No"}</td>}
               <td className="sticky right-0 bg-white px-3 py-2 shadow-[-6px_0_8px_-6px_rgba(15,23,42,0.25)]">
-                <Link href={`/lineas/${f.id}`} className="inline-block rounded bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800">
+                <Link href={volver ? `/lineas/${f.id}?volver=${encodeURIComponent(volver)}` : `/lineas/${f.id}`} className="inline-block rounded bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800">
                   Gestionar
                 </Link>
               </td>

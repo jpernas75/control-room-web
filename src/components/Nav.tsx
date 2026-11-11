@@ -8,7 +8,7 @@ function fecha(d: Date | undefined) {
   return d.toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Madrid" });
 }
 
-export async function Nav() {
+export async function Nav({ bandeja = "/" }: { bandeja?: string }) {
   await connection();
   const sesion = await auth();
   if (!sesion?.user) return null;
@@ -22,6 +22,7 @@ export async function Nav() {
       admin={sesion.user.role === "ADMIN"}
       json={fecha(json?.createdAt)}
       excel={fecha(excel?.createdAt)}
+      bandeja={bandeja}
     />
   );
 }

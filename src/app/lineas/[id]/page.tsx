@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { MarcarDesplazado } from "@/components/MarcarDesplazado";
 import { Nav } from "@/components/Nav";
 import { CENTROS } from "@/domain/centros";
 import { textoDetalle } from "@/domain/comentario";
+import { hrefBandeja } from "@/domain/vista-bandeja";
 import { puedeEditar, puedeVer } from "@/domain/acceso";
 import { prisma } from "@/lib/prisma";
 import { sesionActual } from "@/lib/sesion";
@@ -10,10 +12,17 @@ import { cambiarCentro, guardarComentario, guardarFechaPrevista, marcarDesplazad
 
 export const dynamic = "force-dynamic";
 
-export default async function Ficha({ params }: { params: Promise<{ id: string }> }) {
+export default async function Ficha({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ volver?: string | string[] }>;
+}) {
   const sesion = await sesionActual();
   if (!sesion) redirect("/login");
   const { id } = await params;
+  const bandeja = hrefBandeja((await searchParams).volver);
   const linea = await prisma.linea.findUnique({
     where: { id },
     include: { centro: true, comentarioUser: true, cambios: { include: { user: true }, orderBy: { createdAt: "desc" } } },
@@ -27,11 +36,11 @@ export default async function Ficha({ params }: { params: Promise<{ id: string }
 
   return (
     <>
-      <Nav />
+      <Nav bandeja={bandeja} />
       <main className="mx-auto max-w-3xl px-4 py-6">
-      <a className="text-sm text-slate-600 underline" href="/">
+      <Link className="text-sm text-slate-600 underline" href={bandeja}>
         Volver a la bandeja
-      </a>
+      </Link>
       <article className="mt-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <h1 className="text-xl font-semibold">{linea.expedienteId || linea.vin}</h1>
         <p className="mt-1 text-sm text-slate-600">

@@ -2,12 +2,18 @@ import { redirect } from "next/navigation";
 import { Bandeja, type FilaBandeja } from "@/components/Bandeja";
 import { Nav } from "@/components/Nav";
 import { textoDetalle } from "@/domain/comentario";
+import { vistaDesdeConsulta } from "@/domain/vista-bandeja";
 import { listarLineas } from "@/lib/lineas";
 import { sesionActual } from "@/lib/sesion";
 
 export const dynamic = "force-dynamic";
 
-export default async function PaginaBandeja() {
+export default async function PaginaBandeja({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const inicial = vistaDesdeConsulta(await searchParams);
   const sesion = await sesionActual();
   if (!sesion) redirect("/login");
   const lineas = await listarLineas(sesion);
@@ -36,7 +42,7 @@ export default async function PaginaBandeja() {
   return (
     <>
       <Nav />
-      <Bandeja filas={filas} />
+      <Bandeja filas={filas} inicial={inicial} />
     </>
   );
 }

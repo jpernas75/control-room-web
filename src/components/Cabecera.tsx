@@ -24,8 +24,8 @@ function IconoControl() {
   );
 }
 
-function Pestana({ href, label, pathname }: { href: string; label: string; pathname: string }) {
-  const activa = href === "/" ? pathname === "/" || pathname.startsWith("/lineas") : pathname === href || pathname.startsWith(`${href}/`);
+function Pestana({ href, label, pathname, bandeja = false }: { href: string; label: string; pathname: string; bandeja?: boolean }) {
+  const activa = bandeja ? pathname === "/" || pathname.startsWith("/lineas") : pathname === href || pathname.startsWith(`${href}/`);
   return (
     <Link
       href={href}
@@ -45,18 +45,20 @@ export function Cabecera({
   admin,
   json,
   excel,
+  bandeja,
 }: {
   nombre: string;
   admin: boolean;
   json: string;
   excel: string;
+  bandeja: string;
 }) {
   const pathname = usePathname() || "/";
   return (
     <header className="border-b border-slate-200 bg-white">
       <div className="mx-auto flex w-full max-w-[1600px] flex-wrap items-center justify-between gap-4 px-4 py-3 lg:px-6">
         <div className="flex min-w-0 flex-wrap items-center gap-4">
-          <Link href="/" className="flex shrink-0 items-center gap-3">
+          <Link href={bandeja} className="flex shrink-0 items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo-inturasa.png" alt="Inturasa" width={340} height={114} className="h-[4.5rem] w-auto" />
             <span className="flex items-center gap-2 text-lg font-medium text-slate-900">
@@ -65,7 +67,7 @@ export function Cabecera({
             </span>
           </Link>
           <nav className="flex flex-wrap items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 p-1" aria-label="Apartados">
-            <Pestana href="/" label="Bandeja" pathname={pathname} />
+            <Pestana href={bandeja} label="Bandeja" pathname={pathname} bandeja />
             <Pestana href="/calendario" label="Calendario" pathname={pathname} />
             {admin ? (
               <>
