@@ -19,10 +19,21 @@ export const metadata: Metadata = {
   description: "Control Room y preventivos VCO por delegación",
 };
 
+function MarcaDeploy() {
+  const commit = (process.env.RENDER_GIT_COMMIT ?? "").slice(0, 7);
+  if (!commit) return null;
+  return (
+    <p className="fixed right-4 top-1.5 z-50 font-mono text-[11px] leading-none text-slate-400" title={process.env.RENDER_GIT_COMMIT}>
+      deploy {commit}
+    </p>
+  );
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+        <MarcaDeploy />
         <div className="flex flex-1 flex-col">{children}</div>
         <footer className="px-4 py-4 text-center text-xs leading-relaxed text-slate-500">
           Está prohibido distribuir el usuario y la contraseña. La página no se actualiza automáticamente: los cambios en CAR o ICSS pueden tardar 1 día en verse reflejados.
