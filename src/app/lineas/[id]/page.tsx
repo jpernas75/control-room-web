@@ -49,6 +49,14 @@ export default async function Ficha({
         </h1>
         <p className="mt-1 text-sm text-slate-600">{linea.expedienteId || linea.vin}</p>
         <dl className="mt-4 grid gap-2 text-sm">
+          {linea.estadoIcss ? (
+            <div>
+              <dt className="text-slate-500">Estado</dt>
+              <dd className="mt-0.5">
+                <EstadoTag estado={linea.estadoIcss} />
+              </dd>
+            </div>
+          ) : null}
           <Dato k="VIN" v={linea.vin} />
           <Dato k="Matrícula" v={linea.matricula} />
           <Dato k="Modelo" v={linea.modelo} />
@@ -146,6 +154,18 @@ export default async function Ficha({
       </main>
     </>
   );
+}
+
+function claseEstado(estado: string): string {
+  const clave = estado.trim().toLowerCase();
+  if (clave === "open") return "bg-sky-100 text-sky-950";
+  if (clave === "billed") return "bg-emerald-100 text-emerald-950";
+  if (clave === "closed") return "bg-slate-200 text-slate-700";
+  return "bg-slate-100 text-slate-800";
+}
+
+function EstadoTag({ estado }: { estado: string }) {
+  return <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${claseEstado(estado)}`}>{estado}</span>;
 }
 
 function Dato({ k, v }: { k: string; v: string }) {
