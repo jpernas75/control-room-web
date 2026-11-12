@@ -19,6 +19,6 @@ Entra en http://localhost:3000 con el usuario `admin` y `SEED_ADMIN_PASSWORD`. E
 
 Proyecto nuevo **Control Room** en el espacio Laia, al lado de Call center NPS. Región Frankfurt. Base `control-room-db` (plan `basic_256mb`, Postgres 16) y servicio `control-room-web` (plan `starter`).
 
-Antes del primer arranque define `SEED_ADMIN_PASSWORD`. El arranque aplica las migraciones y crea el administrador si aún no existe. No vuelve a cambiar su clave en los arranques siguientes.
+Antes del primer arranque define `SEED_ADMIN_PASSWORD`. El arranque aplica las migraciones y crea el administrador si aún no existe. No vuelve a cambiar su clave en los arranques siguientes. `SEED_AGUSTIN_PASSWORD` y `SEED_MAR_PASSWORD` crean las cuentas admin `agustin` y `mar` del mismo modo, solo si aún no existen.
 
 La subida automática desde ICSS-ANS24 no entra en esta versión. El JSON y el Excel se importan a mano desde Importar.

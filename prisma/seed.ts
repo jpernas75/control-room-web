@@ -22,19 +22,27 @@ async function main() {
     });
   }
 
-  const admin = await prisma.user.findUnique({ where: { username: "admin" } });
-  if (!admin) {
-    const password = process.env.SEED_ADMIN_PASSWORD;
-    if (!password) throw new Error("Falta SEED_ADMIN_PASSWORD para crear el administrador");
-    await prisma.user.create({
-      data: {
-        username: "admin",
-        name: "Administrador",
-        role: "ADMIN",
-        passwordHash: await bcrypt.hash(password, 10),
-      },
-    });
+  await crearAdminSiFalta("admin", "Administrador", process.env.SEED_ADMIN_PASSWORD, true);
+  await crearAdminSiFalta("agustin", "Agustin", process.env.SEED_AGUSTIN_PASSWORD, false);
+  await crearAdminSiFalta("mar", "Mar", process.env.SEED_MAR_PASSWORD, false);
+}
+
+async function crearAdminSiFalta(username: string, name: string, password: string | undefined, obligatorio: boolean) {
+  const existe = await prisma.user.findUnique({ where: { username } });
+  if (existe) return;
+  if (!password) {
+    if (obligatorio) throw new Error(`Falta la clave para crear ${username}`);
+    console.warn(`No se crea ${username}: falta su clave de arranque`);
+    return;
   }
+  await prisma.user.create({
+    data: {
+      username,
+      name,
+      role: "ADMIN",
+      passwordHash: await bcrypt.hash(password, 10),
+    },
+  });
 }
 
 main()

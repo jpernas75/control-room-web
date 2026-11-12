@@ -22,7 +22,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full bg-slate-50 text-slate-900">{children}</body>
+      <body className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+        <div className="flex flex-1 flex-col">{children}</div>
+        <footer className="px-4 py-4 text-center text-xs leading-relaxed text-slate-500">
+          Está prohibido distribuir el usuario y la contraseña. La página no se actualiza automáticamente: los cambios en CAR o ICSS pueden tardar 1 día en verse reflejados.
+        </footer>
+      </body>
     </html>
   );
 }
