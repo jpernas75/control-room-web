@@ -19,9 +19,9 @@ describe("situacion", () => {
     expect(esVco("TURBOCHARGING SYSTEM")).toBe(false);
   });
 
-  it("marca cerrar, sin OR, llegada, pendiente, facturado y cerrado", () => {
+  it("marca cerrar, abierto, llegada, pendiente, facturado y cerrado", () => {
     expect(situacion({ ...base, tieneOr: true, orEntregada: true }).texto).toBe("Cerrar en ICSS");
-    expect(situacion({ ...base, fechaIso: "2026-11-01T10:00:00", hoy: "2026-11-11" }).texto).toBe("Sin OR · 10 días");
+    expect(situacion({ ...base, fechaIso: "2026-11-01T10:00:00", hoy: "2026-11-11" }).texto).toBe("Abierto");
     expect(situacion({ ...base, fechaIso: "2026-11-10T10:00:00", fase: "Waiting for arrival" }).texto).toBe("Esperando llegada");
     expect(situacion({ ...base, fechaIso: "2026-11-10T10:00:00", tieneOr: true }).texto).toBe("Pendiente");
     expect(situacion({ ...base, abierto: false, estadoIcss: "Billed" }).texto).toBe("Facturado");

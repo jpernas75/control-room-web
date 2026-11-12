@@ -30,7 +30,7 @@ export function situacion(input: SituacionInput): { key: string; texto: string }
   if (input.origen === "PREVENTIVO") return { key: "preventivo", texto: "Preventivo" };
   if (input.abierto && input.orEntregada) return { key: "cerrar", texto: "Cerrar en ICSS" };
   const d = dias(input.fechaIso, input.hoy);
-  if (input.abierto && !input.tieneOr && d > 7) return { key: "sinor", texto: `Sin OR · ${d} días` };
+  if (input.abierto && !input.tieneOr && d > 7) return { key: "abierto", texto: "Abierto" };
   if (input.abierto && fold(input.fase).includes("waiting for arrival")) {
     return { key: "llegada", texto: "Esperando llegada" };
   }

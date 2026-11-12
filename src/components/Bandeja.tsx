@@ -37,7 +37,7 @@ const AVISO: Record<string, string> = {
   alerta: "bg-amber-100 text-amber-950",
   preventivo: "bg-amber-50 text-amber-900",
   cerrar: "bg-sky-100 text-sky-950",
-  sinor: "bg-rose-100 text-rose-950",
+  abierto: "bg-slate-100 text-slate-800",
   llegada: "bg-sky-50 text-sky-900",
   pendiente: "bg-slate-100 text-slate-700",
   facturado: "bg-emerald-100 text-emerald-950",
@@ -46,8 +46,8 @@ const AVISO: Record<string, string> = {
 
 const ORDEN_SIT: Record<string, number> = {
   cerrar: 0,
-  sinor: 1,
-  llegada: 2,
+  llegada: 1,
+  abierto: 2,
   pendiente: 3,
   facturado: 4,
   cerrado: 5,
