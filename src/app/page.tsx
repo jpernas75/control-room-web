@@ -30,6 +30,7 @@ export default async function PaginaBandeja({
     cliente: l.cliente,
     vehiculo: l.matricula,
     detalle: textoDetalle(l),
+    comentario: l.comentario,
     situacionKey: l.situacion.key,
     situacionTexto: l.situacion.texto,
     estadoIcss: l.estadoIcss,

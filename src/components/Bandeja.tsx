@@ -18,6 +18,7 @@ export type FilaBandeja = {
   cliente: string;
   vehiculo: string;
   detalle: string;
+  comentario: string;
   situacionKey: string;
   situacionTexto: string;
   estadoIcss: string;
@@ -394,7 +395,7 @@ function Tabla({
   volver: string;
   actualizacion?: string;
 }) {
-  const columnas = controlRoom ? 11 : 8;
+  const columnas = controlRoom ? 12 : 8;
   const hoy = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Madrid" });
   return (
     <div className="overflow-x-auto">
@@ -409,6 +410,7 @@ function Tabla({
             {controlRoom ? <SortTh label="Vehículo" sortKey="vehiculo" sort={sort} onSort={onSort} /> : null}
             {controlRoom ? <th className="px-3 py-2 font-medium">VCO</th> : null}
             <SortTh label="Detalle" sortKey="detalle" sort={sort} onSort={onSort} />
+            {controlRoom ? <th className="px-3 py-2 font-medium">Comentarios</th> : null}
             {controlRoom ? <SortTh label="OR CAR" sortKey="or" sort={sort} onSort={onSort} /> : null}
             {controlRoom ? <SortTh label="Estado" sortKey="estado" sort={sort} onSort={onSort} /> : null}
             {controlRoom ? null : <SortTh label="Desplazado" sortKey="desplazado" sort={sort} onSort={onSort} />}
@@ -448,7 +450,14 @@ function Tabla({
               {controlRoom ? (
                 <td className="px-3 py-2">{esVco(f.detalle) ? <span className="rounded bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-950">VCO</span> : null}</td>
               ) : null}
-              <td className="max-w-[18rem] truncate px-3 py-2 text-slate-600" title={f.detalle}>{f.detalle}</td>
+              <td className="px-3 py-2">
+                <div className="max-w-[9rem] truncate text-slate-600" title={f.detalle}>{f.detalle}</div>
+              </td>
+              {controlRoom ? (
+                <td className="px-3 py-2">
+                  <CeldaComentario texto={f.comentario} />
+                </td>
+              ) : null}
               {controlRoom ? (
                 <td className="px-3 py-2">
                   <CeldaOr fila={f} actualizacion={actualizacion} />
@@ -512,6 +521,46 @@ function EtiquetaCita({ fecha }: { fecha: string }) {
       <span className="rounded bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-950">Cita</span>
       {corta ? <span className="ml-1 tabular-nums">{corta}</span> : null}
     </span>
+  );
+}
+
+function CeldaComentario({ texto }: { texto: string }) {
+  const [abierto, setAbierto] = useState(false);
+  useEffect(() => {
+    if (!abierto) return;
+    function cerrar(e: KeyboardEvent) {
+      if (e.key === "Escape") setAbierto(false);
+    }
+    window.addEventListener("keydown", cerrar);
+    return () => window.removeEventListener("keydown", cerrar);
+  }, [abierto]);
+  const limpio = texto.trim();
+  if (!limpio) return null;
+  return (
+    <>
+      <button type="button" onClick={() => setAbierto(true)} className="block max-w-[12rem] truncate text-left text-slate-700 hover:underline">
+        {limpio}
+      </button>
+      {abierto ? (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 p-4" onClick={() => setAbierto(false)}>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Comentario"
+            className="max-h-[80vh] w-full max-w-lg overflow-auto rounded-lg bg-white p-5 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-start justify-between gap-4">
+              <h3 className="text-sm font-semibold text-slate-900">Comentario</h3>
+              <button type="button" onClick={() => setAbierto(false)} className="text-sm text-slate-500 hover:text-slate-800">
+                Cerrar
+              </button>
+            </div>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-800">{limpio}</p>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
 
