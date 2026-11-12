@@ -79,6 +79,7 @@ function valor(fila: FilaBandeja, key: SortKey): string | number {
   if (key === "or") return claveOr(fila);
   if (key === "desplazado") return fila.desplazado ? "1" : "0";
   if (key === "solicitud") return fila.solicitarCr ? `1 ${fila.fechaPrevista}` : "0";
+  if (key === "cita") return fila.fechaPrevista;
   return fila.detalle;
 }
 
@@ -292,7 +293,7 @@ export function Bandeja({ filas, inicial }: { filas: FilaBandeja[]; inicial: Vis
 
       <section className="mb-8 rounded-lg border border-slate-200 bg-white shadow-sm">
         <h2 className="border-b border-slate-200 px-4 py-3 text-lg font-semibold">
-          Preventivos <span className="text-sm font-normal text-slate-500">{preventivos.length}</span>
+          Preventivos VCO <span className="text-sm font-normal text-slate-500">{preventivos.length}</span>
         </h2>
         <Tabla
           filas={preventivos}
@@ -362,7 +363,7 @@ function Tabla({
   controlRoom?: boolean;
   volver: string;
 }) {
-  const columnas = controlRoom ? 11 : 7;
+  const columnas = controlRoom ? 11 : 8;
   return (
     <div className="overflow-x-auto">
       <table className={`w-full text-left text-xs ${controlRoom ? "min-w-[1100px]" : "min-w-[880px]"}`}>
@@ -380,6 +381,7 @@ function Tabla({
             {controlRoom ? <SortTh label="Estado" sortKey="estado" sort={sort} onSort={onSort} /> : null}
             {controlRoom ? null : <SortTh label="Desplazado" sortKey="desplazado" sort={sort} onSort={onSort} />}
             {controlRoom ? null : <SortTh label="Solicitar Control Room" sortKey="solicitud" sort={sort} onSort={onSort} />}
+            {controlRoom ? null : <SortTh label="Cita" sortKey="cita" sort={sort} onSort={onSort} />}
             <th className="sticky right-0 bg-slate-50 px-3 py-2 shadow-[-6px_0_8px_-6px_rgba(15,23,42,0.2)]" />
           </tr>
         </thead>
@@ -424,6 +426,11 @@ function Tabla({
                   <CeldaSolicitud fila={f} />
                 </td>
               )}
+              {controlRoom ? null : (
+                <td className="whitespace-nowrap px-3 py-2">
+                  {f.fechaPrevista ? <EtiquetaCita fecha={f.fechaPrevista} /> : null}
+                </td>
+              )}
               <td className={`sticky right-0 px-3 py-2 shadow-[-6px_0_8px_-6px_rgba(15,23,42,0.25)] ${f.nuevo ? "bg-emerald-50" : "bg-white"}`}>
                 <Link href={volver ? `/lineas/${f.id}?volver=${encodeURIComponent(volver)}` : `/lineas/${f.id}`} className="inline-block rounded bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800">
                   Gestionar
@@ -455,16 +462,18 @@ function CeldaSolicitud({ fila }: { fila: FilaBandeja }) {
   return <span>{fecha ? `Sí · ${fecha}` : "Sí"}</span>;
 }
 
+function EtiquetaCita({ fecha }: { fecha: string }) {
+  const corta = fechaCorta(fecha);
+  return (
+    <span className="whitespace-nowrap">
+      <span className="rounded bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-950">Cita</span>
+      {corta ? <span className="ml-1 tabular-nums">{corta}</span> : null}
+    </span>
+  );
+}
+
 function CeldaOr({ fila }: { fila: FilaBandeja }) {
-  if (fila.orCita) {
-    const fecha = fechaCorta(fila.orFechaCita);
-    return (
-      <span className="whitespace-nowrap">
-        <span className="rounded bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-950">Cita</span>
-        {fecha ? <span className="ml-1 tabular-nums">{fecha}</span> : null}
-      </span>
-    );
-  }
+  if (fila.orCita) return <EtiquetaCita fecha={fila.orFechaCita} />;
   if (tieneOr(fila)) {
     const numero = fila.orNumero || fila.orId;
     const enlace = fila.orUrl ? (
