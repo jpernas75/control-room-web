@@ -68,21 +68,6 @@ export default async function Ficha({
           <p className="mt-4 text-sm text-amber-800">Salió de la lista de preventivos y no ha aparecido en ICSS.</p>
         ) : null}
 
-        <form action={guardarComentario.bind(null, linea.id)} className="mt-6">
-          <label className="block text-sm font-medium">
-            Comentario
-            <textarea name="comentario" defaultValue={textoComentario} rows={4} disabled={!editar} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
-          </label>
-          {linea.comentarioAt ? (
-            <p className="mt-1 text-xs text-slate-500">
-              {linea.comentarioUser?.name ?? "Alguien"} · {linea.comentarioAt.toLocaleString("es-ES", { timeZone: "Europe/Madrid" })}
-            </p>
-          ) : textoComentario ? null : (
-            <p className="mt-1 text-xs text-slate-500">Sin comentario</p>
-          )}
-          {editar ? <button className="mt-2 rounded-md bg-slate-900 px-3 py-1.5 text-sm text-white" type="submit">Guardar comentario</button> : null}
-        </form>
-
         {linea.origen === "PREVENTIVO" ? (
           <MarcarDesplazado
             key={String(linea.desplazado)}
@@ -145,6 +130,21 @@ export default async function Ficha({
             <p className="mt-1 text-xs text-red-600">Para que la fecha sea válida crear una cita en CAR</p>
           </form>
         )}
+
+        <form action={guardarComentario.bind(null, linea.id)} className="mt-6">
+          <label className="block text-sm font-medium">
+            Comentario
+            <textarea name="comentario" defaultValue={textoComentario} rows={4} disabled={!editar} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
+          </label>
+          {linea.comentarioAt ? (
+            <p className="mt-1 text-xs text-slate-500">
+              {linea.comentarioUser?.name ?? "Alguien"} · {linea.comentarioAt.toLocaleString("es-ES", { timeZone: "Europe/Madrid" })}
+            </p>
+          ) : textoComentario ? null : (
+            <p className="mt-1 text-xs text-slate-500">Sin comentario</p>
+          )}
+          {editar ? <button className="mt-2 rounded-md bg-slate-900 px-3 py-1.5 text-sm text-white" type="submit">Guardar comentario</button> : null}
+        </form>
       </article>
       </main>
     </>
