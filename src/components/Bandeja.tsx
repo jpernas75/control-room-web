@@ -451,11 +451,11 @@ function Tabla({
                 <td className="px-3 py-2">{esVco(f.detalle) ? <span className="rounded bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-950">VCO</span> : null}</td>
               ) : null}
               <td className="px-3 py-2">
-                <div className="max-w-[9rem] truncate text-slate-600" title={f.detalle}>{f.detalle}</div>
+                <CeldaTexto texto={f.detalle} titulo={controlRoom ? "Detalle" : "Comentarios"} ancho={controlRoom ? "max-w-[9rem]" : "max-w-[12rem]"} />
               </td>
               {controlRoom ? (
                 <td className="px-3 py-2">
-                  <CeldaComentario texto={f.comentario} />
+                  <CeldaTexto texto={f.comentario} titulo="Comentario" ancho="max-w-[12rem]" />
                 </td>
               ) : null}
               {controlRoom ? (
@@ -530,7 +530,7 @@ function EtiquetaCita({ fecha }: { fecha: string }) {
   );
 }
 
-function CeldaComentario({ texto }: { texto: string }) {
+function CeldaTexto({ texto, titulo, ancho }: { texto: string; titulo: string; ancho: string }) {
   const [abierto, setAbierto] = useState(false);
   useEffect(() => {
     if (!abierto) return;
@@ -544,7 +544,7 @@ function CeldaComentario({ texto }: { texto: string }) {
   if (!limpio) return null;
   return (
     <>
-      <button type="button" onClick={() => setAbierto(true)} className="block max-w-[12rem] truncate text-left text-slate-700 hover:underline">
+      <button type="button" onClick={() => setAbierto(true)} className={`block truncate text-left text-slate-700 hover:underline ${ancho}`}>
         {limpio}
       </button>
       {abierto ? (
@@ -552,12 +552,12 @@ function CeldaComentario({ texto }: { texto: string }) {
           <div
             role="dialog"
             aria-modal="true"
-            aria-label="Comentario"
+            aria-label={titulo}
             className="max-h-[80vh] w-full max-w-lg overflow-auto rounded-lg bg-white p-5 shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-3 flex items-start justify-between gap-4">
-              <h3 className="text-sm font-semibold text-slate-900">Comentario</h3>
+              <h3 className="text-sm font-semibold text-slate-900">{titulo}</h3>
               <button type="button" onClick={() => setAbierto(false)} className="text-sm text-slate-500 hover:text-slate-800">
                 Cerrar
               </button>
