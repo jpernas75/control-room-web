@@ -518,7 +518,15 @@ function CeldaOr({ fila }: { fila: FilaBandeja }) {
     return (
       <span className="whitespace-nowrap">
         <EtiquetaCita fecha={fila.fechaPrevista} />
-        {aviso ? <span className="ml-1 font-bold text-rose-600" title={aviso} aria-label={aviso}>!</span> : null}
+        {aviso ? (
+          <span
+            className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[11px] font-bold leading-none text-white"
+            title={aviso}
+            aria-label={aviso}
+          >
+            !
+          </span>
+        ) : null}
       </span>
     );
   }
