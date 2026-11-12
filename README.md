@@ -13,7 +13,7 @@ npx prisma db seed
 npm run dev
 ```
 
-Entra en http://localhost:3000 con el usuario `admin` y `SEED_ADMIN_PASSWORD`. En Centros pon la clave de `sada`, `porrino`, `orense`, `santiago`, `pontevedra` y `lugo`.
+Entra en http://localhost:3000 con el usuario `admin` y `SEED_ADMIN_PASSWORD`. En Usuarios pon la clave de `sada`, `vigo`, `orense`, `santiago`, `pontevedra` y `lugo`. Las cuentas no distinguen mayúsculas.
 
 ## Render
 

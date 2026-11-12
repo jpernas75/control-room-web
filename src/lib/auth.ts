@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
+import { cuentaNormalizada } from "@/domain/centros";
 import { prisma } from "./prisma";
 import { authConfig } from "./auth.config";
 
@@ -13,10 +14,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Clave", type: "password" },
       },
       async authorize(credentials) {
-        const username = String(credentials?.username ?? "").trim().toLowerCase();
+        const username = cuentaNormalizada(String(credentials?.username ?? ""));
         const password = String(credentials?.password ?? "");
         if (!username || !password) return null;
-        const user = await prisma.user.findUnique({ where: { username } });
+        const user = await prisma.user.findFirst({
+          where: { username: { equals: username, mode: "insensitive" } },
+        });
         if (!user?.passwordHash) return null;
         const ok = await bcrypt.compare(password, user.passwordHash);
         if (!ok) return null;

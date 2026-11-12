@@ -4,12 +4,16 @@ export type Centro = CentroNombre | "Sin centro";
 
 export const USUARIO_CENTRO: Record<string, CentroNombre> = {
   sada: "Sada",
-  porrino: "Porriño",
+  vigo: "Porriño",
   orense: "Orense",
   santiago: "Santiago",
   pontevedra: "Pontevedra",
   lugo: "Lugo",
 };
+
+export function cuentaNormalizada(raw: string): string {
+  return raw.trim().toLowerCase();
+}
 
 const NOMBRE_CUENTA: Partial<Record<CentroNombre, string>> = {
   Porriño: "Vigo",

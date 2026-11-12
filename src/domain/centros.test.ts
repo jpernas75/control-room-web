@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { centroDesdeCuenta, centroDesdeOr, nombreCuenta, normalizarCentro, resolverCentro } from "./centros";
+import { USUARIO_CENTRO, centroDesdeCuenta, centroDesdeOr, cuentaNormalizada, nombreCuenta, normalizarCentro, resolverCentro } from "./centros";
 
 describe("centros", () => {
-  it("la cuenta de Porriño se llama Vigo", () => {
+  it("la cuenta de Porriño se llama Vigo y no distingue mayúsculas", () => {
     expect(nombreCuenta("Porriño")).toBe("Vigo");
     expect(nombreCuenta("Lugo")).toBe("Lugo");
+    expect(USUARIO_CENTRO.vigo).toBe("Porriño");
+    expect(cuentaNormalizada(" VIGO ")).toBe("vigo");
+    expect(cuentaNormalizada("Sada")).toBe("sada");
   });
 
   it("normaliza alias del Excel y de ICSS", () => {

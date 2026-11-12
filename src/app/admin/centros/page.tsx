@@ -16,7 +16,7 @@ export default async function Usuarios() {
       <Nav />
       <main className="mx-auto max-w-xl px-4 py-6">
         <h1 className="text-2xl font-semibold">Usuarios</h1>
-        <p className="mt-1 text-sm text-slate-600">La cuenta es el nombre en minúsculas. La clave nueva tiene al menos 8 caracteres.</p>
+        <p className="mt-1 text-sm text-slate-600">Da igual si la cuenta va en mayúsculas o minúsculas. La clave nueva tiene al menos 8 caracteres.</p>
         <ul className="mt-4 space-y-3">
           {usuarios.map((u) => (
             <li key={u.id} className="rounded-lg border border-slate-200 bg-white p-4">
