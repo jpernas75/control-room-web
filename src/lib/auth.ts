@@ -20,6 +20,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!user?.passwordHash) return null;
         const ok = await bcrypt.compare(password, user.passwordHash);
         if (!ok) return null;
+        await prisma.acceso.create({ data: { userId: user.id } });
         return {
           id: user.id,
           name: user.name,

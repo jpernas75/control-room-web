@@ -112,12 +112,14 @@ function PestanaCalendario({ pathname }: { pathname: string }) {
 export function Cabecera({
   nombre,
   admin,
+  principal,
   json,
   excel,
   bandeja,
 }: {
   nombre: string;
   admin: boolean;
+  principal: boolean;
   json: string;
   excel: string;
   bandeja: string;
@@ -140,10 +142,11 @@ export function Cabecera({
               Bandeja
             </EnlaceBandeja>
             <PestanaCalendario pathname={pathname} />
-            {admin ? (
+            {admin ? <Pestana href="/importar" label="Importar" pathname={pathname} /> : null}
+            {principal ? (
               <>
-                <Pestana href="/importar" label="Importar" pathname={pathname} />
-                <Pestana href="/admin/centros" label="Centros" pathname={pathname} />
+                <Pestana href="/admin/centros" label="Usuarios" pathname={pathname} />
+                <Pestana href="/admin/log" label="Log" pathname={pathname} />
               </>
             ) : null}
           </nav>

@@ -38,6 +38,7 @@ model User {
   centro       Centro?        @relation(fields: [centroId], references: [id])
   comentarios  Linea[]        @relation("comentario")
   cambios      CambioCentro[]
+  accesos      Acceso[]
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 }
@@ -107,6 +108,16 @@ model CambioCentro {
   desde     String
   hacia     String
   createdAt DateTime @default(now())
+}
+
+model Acceso {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId])
 }
 
 model ImportBatch {

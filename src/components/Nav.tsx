@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { esCuentaAdministrador } from "@/lib/sesion";
 import { Cabecera } from "./Cabecera";
 
 function fecha(d: Date | undefined) {
@@ -20,6 +21,7 @@ export async function Nav({ bandeja = "/" }: { bandeja?: string }) {
     <Cabecera
       nombre={sesion.user.name ?? ""}
       admin={sesion.user.role === "ADMIN"}
+      principal={await esCuentaAdministrador()}
       json={fecha(json?.createdAt)}
       excel={fecha(excel?.createdAt)}
       bandeja={bandeja}
