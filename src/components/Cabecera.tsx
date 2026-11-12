@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -30,6 +31,17 @@ function clasePestana(activa: boolean): string {
     : "rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50";
 }
 
+function hrefBandeja(pathname: string, bandeja: string): string {
+  if (pathname.startsWith("/calendario")) {
+    const params = new URLSearchParams();
+    for (const centro of new URLSearchParams(window.location.search).getAll("centro")) params.append("centro", centro);
+    const consulta = params.toString();
+    return consulta ? `/?${consulta}` : "/";
+  }
+  if (pathname === "/") return window.location.search ? `/${window.location.search}` : "/";
+  return bandeja;
+}
+
 function hrefCalendario(pathname: string): string {
   const actual = new URLSearchParams(window.location.search);
   if (pathname.startsWith("/calendario")) return `/calendario${window.location.search}`;
@@ -41,11 +53,41 @@ function hrefCalendario(pathname: string): string {
   return consulta ? `/calendario?${consulta}` : "/calendario";
 }
 
-function Pestana({ href, label, pathname, bandeja = false }: { href: string; label: string; pathname: string; bandeja?: boolean }) {
-  const activa = bandeja ? pathname === "/" || pathname.startsWith("/lineas") : pathname === href || pathname.startsWith(`${href}/`);
+function Pestana({ href, label, pathname }: { href: string; label: string; pathname: string }) {
+  const activa = pathname === href || pathname.startsWith(`${href}/`);
   return (
     <Link href={href} className={clasePestana(activa)}>
       {label}
+    </Link>
+  );
+}
+
+function EnlaceBandeja({
+  pathname,
+  bandeja,
+  className,
+  children,
+  pestana = false,
+}: {
+  pathname: string;
+  bandeja: string;
+  className?: string;
+  children: ReactNode;
+  pestana?: boolean;
+}) {
+  const router = useRouter();
+  const activa = pathname === "/" || pathname.startsWith("/lineas");
+  return (
+    <Link
+      href={bandeja}
+      className={pestana ? clasePestana(activa) : className}
+      onClick={(e) => {
+        if (pathname !== "/" && !pathname.startsWith("/calendario")) return;
+        e.preventDefault();
+        router.push(hrefBandeja(pathname, bandeja));
+      }}
+    >
+      {children}
     </Link>
   );
 }
@@ -85,16 +127,18 @@ export function Cabecera({
     <header className="border-b border-slate-200 bg-white">
       <div className="mx-auto flex w-full max-w-[1600px] flex-wrap items-center justify-between gap-4 px-4 py-3 lg:px-6">
         <div className="flex min-w-0 flex-wrap items-center gap-4">
-          <Link href={bandeja} className="flex shrink-0 items-center gap-3">
+          <EnlaceBandeja pathname={pathname} bandeja={bandeja} className="flex shrink-0 items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo-inturasa.png" alt="Inturasa" width={340} height={114} className="h-[4.5rem] w-auto" />
             <span className="flex items-center gap-2 text-lg font-medium text-slate-900">
               <IconoControl />
               Control Room
             </span>
-          </Link>
+          </EnlaceBandeja>
           <nav className="flex flex-wrap items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 p-1" aria-label="Apartados">
-            <Pestana href={bandeja} label="Bandeja" pathname={pathname} bandeja />
+            <EnlaceBandeja pathname={pathname} bandeja={bandeja} pestana>
+              Bandeja
+            </EnlaceBandeja>
             <PestanaCalendario pathname={pathname} />
             {admin ? (
               <>
