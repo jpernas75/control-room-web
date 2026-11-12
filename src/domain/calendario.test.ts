@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { marcasDeLinea, mesesConMarcas, recepcionDe } from "./calendario";
+import { marcasDeLinea, mesesCompletos, mesesConMarcas, recepcionDe } from "./calendario";
 
 const vacia = {
   presencia: "ACTIVA" as const,
@@ -47,6 +47,14 @@ describe("calendario", () => {
       "2026-11-11",
     )[0];
     expect(gris.deshabilitada).toBe(true);
+  });
+
+  it("incluye los meses vacíos del año", () => {
+    const meses = mesesCompletos(["2026-05", "2026-11"], "2026-11");
+    expect(meses[0]).toBe("2026-01");
+    expect(meses).toContain("2026-06");
+    expect(meses.at(-1)).toBe("2026-12");
+    expect(meses).toHaveLength(12);
   });
 
   it("un preventivo sin fecha no genera meses", () => {

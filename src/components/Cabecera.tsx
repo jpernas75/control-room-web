@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 
 function IconoControl() {
@@ -24,18 +24,45 @@ function IconoControl() {
   );
 }
 
+function clasePestana(activa: boolean): string {
+  return activa
+    ? "rounded-md border border-slate-900 bg-slate-900 px-3 py-1.5 text-sm font-medium text-white shadow-sm"
+    : "rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50";
+}
+
+function hrefCalendario(pathname: string): string {
+  const actual = new URLSearchParams(window.location.search);
+  if (pathname.startsWith("/calendario")) return `/calendario${window.location.search}`;
+  const origen = pathname === "/" ? actual : pathname.startsWith("/lineas") ? new URLSearchParams(actual.get("volver") ?? "") : null;
+  if (!origen) return "/calendario";
+  const params = new URLSearchParams();
+  for (const centro of origen.getAll("centro")) params.append("centro", centro);
+  const consulta = params.toString();
+  return consulta ? `/calendario?${consulta}` : "/calendario";
+}
+
 function Pestana({ href, label, pathname, bandeja = false }: { href: string; label: string; pathname: string; bandeja?: boolean }) {
   const activa = bandeja ? pathname === "/" || pathname.startsWith("/lineas") : pathname === href || pathname.startsWith(`${href}/`);
   return (
-    <Link
-      href={href}
-      className={
-        activa
-          ? "rounded-md border border-slate-900 bg-slate-900 px-3 py-1.5 text-sm font-medium text-white shadow-sm"
-          : "rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50"
-      }
-    >
+    <Link href={href} className={clasePestana(activa)}>
       {label}
+    </Link>
+  );
+}
+
+function PestanaCalendario({ pathname }: { pathname: string }) {
+  const router = useRouter();
+  const activa = pathname === "/calendario" || pathname.startsWith("/calendario/");
+  return (
+    <Link
+      href="/calendario"
+      className={clasePestana(activa)}
+      onClick={(e) => {
+        e.preventDefault();
+        router.push(hrefCalendario(pathname));
+      }}
+    >
+      Calendario
     </Link>
   );
 }
@@ -68,7 +95,7 @@ export function Cabecera({
           </Link>
           <nav className="flex flex-wrap items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 p-1" aria-label="Apartados">
             <Pestana href={bandeja} label="Bandeja" pathname={pathname} bandeja />
-            <Pestana href="/calendario" label="Calendario" pathname={pathname} />
+            <PestanaCalendario pathname={pathname} />
             {admin ? (
               <>
                 <Pestana href="/importar" label="Importar" pathname={pathname} />

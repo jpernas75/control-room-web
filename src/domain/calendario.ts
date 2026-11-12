@@ -52,6 +52,18 @@ export function marcasDeLinea(linea: LineaCalendario, hoy: string): Marca[] {
   return out;
 }
 
+export function mesesCompletos(conDatos: string[], hoy: string): string[] {
+  const validos = [...conDatos, hoy].filter((m) => /^\d{4}-\d{2}$/.test(m)).sort();
+  if (validos.length === 0) return [];
+  const desdeAno = Number(validos[0].slice(0, 4));
+  const hastaAno = Number(validos[validos.length - 1].slice(0, 4));
+  const out: string[] = [];
+  for (let ano = desdeAno; ano <= hastaAno; ano += 1) {
+    for (let mes = 1; mes <= 12; mes += 1) out.push(`${ano}-${String(mes).padStart(2, "0")}`);
+  }
+  return out;
+}
+
 export function mesesConMarcas(marcas: Marca[]): string[] {
   const meses = new Set<string>();
   for (const m of marcas) {
