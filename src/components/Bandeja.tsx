@@ -387,8 +387,10 @@ function Tabla({
           </tr>
         </thead>
         <tbody>
-          {filas.map((f) => (
-            <tr key={f.id} className={`border-t ${f.nuevo ? "border-emerald-100 bg-emerald-50" : "border-slate-100"}`}>
+          {filas.map((f) => {
+            const sombreada = !controlRoom && f.desplazado;
+            return (
+            <tr key={f.id} className={`border-t ${sombreada ? "border-orange-100 bg-orange-100" : f.nuevo ? "border-emerald-100 bg-emerald-50" : "border-slate-100"}`}>
               {controlRoom ? (
                 <td className="whitespace-nowrap px-3 py-2 tabular-nums">
                   <MarcaNuevo nuevo={f.nuevo} />
@@ -432,13 +434,14 @@ function Tabla({
                   {f.fechaPrevista ? <EtiquetaCita fecha={f.fechaPrevista} /> : null}
                 </td>
               )}
-              <td className={`sticky right-0 px-3 py-2 shadow-[-6px_0_8px_-6px_rgba(15,23,42,0.25)] ${f.nuevo ? "bg-emerald-50" : "bg-white"}`}>
+              <td className={`sticky right-0 px-3 py-2 shadow-[-6px_0_8px_-6px_rgba(15,23,42,0.25)] ${sombreada ? "bg-orange-100" : f.nuevo ? "bg-emerald-50" : "bg-white"}`}>
                 <Link href={volver ? `/lineas/${f.id}?volver=${encodeURIComponent(volver)}` : `/lineas/${f.id}`} className="inline-block rounded bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800">
                   Gestionar
                 </Link>
               </td>
             </tr>
-          ))}
+            );
+          })}
           {filas.length === 0 ? (
             <tr>
               <td className="px-3 py-6 text-slate-500" colSpan={columnas}>
