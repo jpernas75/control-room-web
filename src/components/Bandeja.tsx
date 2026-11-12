@@ -520,11 +520,13 @@ function CeldaOr({ fila }: { fila: FilaBandeja }) {
         <EtiquetaCita fecha={fila.fechaPrevista} />
         {aviso ? (
           <span
-            className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[11px] font-bold leading-none text-white"
+            className="ml-1 inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-red-600 text-white"
             title={aviso}
             aria-label={aviso}
           >
-            !
+            <svg viewBox="0 0 12 12" className="h-3 w-3" aria-hidden="true">
+              <path fill="currentColor" d="M5.15 1.1h1.7v6.3h-1.7zM5.15 8.7h1.7V11h-1.7z" />
+            </svg>
           </span>
         ) : null}
       </span>
