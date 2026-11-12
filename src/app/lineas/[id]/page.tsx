@@ -9,6 +9,7 @@ import { CENTROS, nombreCentroVisible, OTROS, type CentroNombre } from "@/domain
 import { textoDetalle } from "@/domain/comentario";
 import { hrefBandeja } from "@/domain/vista-bandeja";
 import { puedeEditar, puedeVer } from "@/domain/acceso";
+import { ultimaActualizacion } from "@/lib/lineas";
 import { prisma } from "@/lib/prisma";
 import { sesionActual } from "@/lib/sesion";
 import { cambiarCentro, guardarComentario, guardarFechaPrevista, guardarSolicitudCr, marcarDesplazado } from "./actions";
@@ -31,6 +32,7 @@ export default async function Ficha({
     include: { centro: true, comentarioUser: true, cambios: { include: { user: true }, orderBy: { createdAt: "desc" } } },
   });
   if (!linea || !puedeVer(sesion, linea)) notFound();
+  const actualizacion = await ultimaActualizacion();
   const editar = puedeEditar(sesion, linea);
   const textoComentario = linea.origen === "PREVENTIVO" ? textoDetalle(linea) : linea.comentario;
   const centro = nombreCentroVisible(linea);
@@ -128,17 +130,21 @@ export default async function Ficha({
         ) : null}
 
         {linea.origen === "PREVENTIVO" && !linea.orFechaCita ? (
-          <LlegadaPrevista
-            key={`${linea.solicitarCr}-${linea.fechaPrevista ?? ""}`}
-            solicitar={linea.solicitarCr}
-            fecha={linea.fechaPrevista ?? ""}
-            editar={editar}
-            action={guardarSolicitudCr.bind(null, linea.id)}
-          />
+          <>
+            <LlegadaPrevista
+              key={`${linea.solicitarCr}-${linea.fechaPrevista ?? ""}`}
+              solicitar={linea.solicitarCr}
+              fecha={linea.fechaPrevista ?? ""}
+              editar={editar}
+              action={guardarSolicitudCr.bind(null, linea.id)}
+            />
+            <Actualizacion cuando={actualizacion} />
+          </>
         ) : linea.orFechaCita ? (
           <div className="mt-6 text-sm">
             <p>Cita de CAR: {linea.orFechaCita}. Fecha de llegada prevista: {linea.fechaPrevista || "ninguna"}.</p>
             <AvisoCita fechaWeb={linea.fechaPrevista} fechaCar={linea.orFechaCita} orCita={linea.orCita} />
+            <Actualizacion cuando={actualizacion} />
           </div>
         ) : (
           <form action={guardarFechaPrevista.bind(null, linea.id)} className="mt-6">
@@ -151,6 +157,7 @@ export default async function Ficha({
             </div>
             <p className="mt-1 text-xs text-red-600">Para que la fecha sea válida crear una cita en CAR</p>
             <AvisoCita fechaWeb={linea.fechaPrevista} fechaCar={linea.orFechaCita} orCita={linea.orCita} />
+            <Actualizacion cuando={actualizacion} />
           </form>
         )}
 
@@ -176,6 +183,11 @@ function claseEstado(estado: string): string {
   if (clave === "billed") return "bg-emerald-100 text-emerald-950";
   if (clave === "closed") return "bg-slate-200 text-slate-700";
   return "bg-slate-100 text-slate-800";
+}
+
+function Actualizacion({ cuando }: { cuando: string }) {
+  if (!cuando) return null;
+  return <p className="mt-2 text-xs text-slate-500">Última actualización {cuando}</p>;
 }
 
 function AvisoCita({ fechaWeb, fechaCar, orCita }: { fechaWeb: string | null; fechaCar: string; orCita: boolean }) {

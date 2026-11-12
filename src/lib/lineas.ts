@@ -7,6 +7,12 @@ export function hoyMadrid(): string {
   return new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Madrid" });
 }
 
+export async function ultimaActualizacion(): Promise<string> {
+  const batch = await prisma.importBatch.findFirst({ where: { tipo: "JSON" }, orderBy: { createdAt: "desc" } });
+  if (!batch) return "";
+  return batch.createdAt.toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Madrid" });
+}
+
 export async function listarLineas(sesion: Sesion) {
   const filas = await prisma.linea.findMany({
     include: { centro: true, comentarioUser: true },

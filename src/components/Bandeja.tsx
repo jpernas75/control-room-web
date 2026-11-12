@@ -162,7 +162,7 @@ function recortar(texto: string, max: number): string {
   return limpio.length > max ? `${limpio.slice(0, max - 1)}…` : limpio;
 }
 
-export function Bandeja({ filas, inicial }: { filas: FilaBandeja[]; inicial: VistaBandeja }) {
+export function Bandeja({ filas, inicial, actualizacion }: { filas: FilaBandeja[]; inicial: VistaBandeja; actualizacion: string }) {
   const [centros, setCentros] = useState(inicial.centros);
   const [ocultarDeshabilitadas, setOcultarDeshabilitadas] = useState(inicial.ocultarDeshabilitadas);
   const [ocultarAlertas, setOcultarAlertas] = useState(inicial.ocultarAlertas);
@@ -316,6 +316,7 @@ export function Bandeja({ filas, inicial }: { filas: FilaBandeja[]; inicial: Vis
           vacio="No hay Control Room con estos filtros."
           controlRoom
           volver={volver}
+          actualizacion={actualizacion}
         />
       </section>
 
@@ -382,6 +383,7 @@ function Tabla({
   vacio,
   controlRoom = false,
   volver,
+  actualizacion = "",
 }: {
   filas: FilaBandeja[];
   sort: { key: SortKey; dir: "asc" | "desc" };
@@ -390,6 +392,7 @@ function Tabla({
   vacio: string;
   controlRoom?: boolean;
   volver: string;
+  actualizacion?: string;
 }) {
   const columnas = controlRoom ? 11 : 8;
   const hoy = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Madrid" });
@@ -448,7 +451,7 @@ function Tabla({
               <td className="max-w-[18rem] truncate px-3 py-2 text-slate-600" title={f.detalle}>{f.detalle}</td>
               {controlRoom ? (
                 <td className="px-3 py-2">
-                  <CeldaOr fila={f} />
+                  <CeldaOr fila={f} actualizacion={actualizacion} />
                 </td>
               ) : null}
               {controlRoom ? <td className="whitespace-nowrap px-3 py-2">{f.estadoIcss || "—"}</td> : null}
@@ -512,17 +515,23 @@ function EtiquetaCita({ fecha }: { fecha: string }) {
   );
 }
 
-function CeldaOr({ fila }: { fila: FilaBandeja }) {
+function textoPopup(aviso: string, actualizacion: string): string {
+  if (!actualizacion) return aviso;
+  return `${aviso} Última actualización ${actualizacion}.`;
+}
+
+function CeldaOr({ fila, actualizacion }: { fila: FilaBandeja; actualizacion: string }) {
   if (fila.fechaPrevista) {
     const aviso = textoAvisoCita(fila.avisoCita, fila.fechaPrevista, fila.orFechaCita);
+    const popup = textoPopup(aviso, actualizacion);
     return (
       <span className="whitespace-nowrap">
         <EtiquetaCita fecha={fila.fechaPrevista} />
         {aviso ? (
           <span
             className="ml-1 inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-red-600 text-white"
-            title={aviso}
-            aria-label={aviso}
+            title={popup}
+            aria-label={popup}
           >
             <svg viewBox="0 0 12 12" className="h-3 w-3" aria-hidden="true">
               <path fill="currentColor" d="M5.15 1.1h1.7v6.3h-1.7zM5.15 8.7h1.7V11h-1.7z" />

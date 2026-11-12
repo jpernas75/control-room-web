@@ -5,7 +5,7 @@ import { avisoDeCita } from "@/domain/cita";
 import { textoDetalle } from "@/domain/comentario";
 import { nombreCentroVisible, textoCentroFila } from "@/domain/centros";
 import { vistaDesdeConsulta } from "@/domain/vista-bandeja";
-import { listarLineas } from "@/lib/lineas";
+import { listarLineas, ultimaActualizacion } from "@/lib/lineas";
 import { sesionActual } from "@/lib/sesion";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +18,7 @@ export default async function PaginaBandeja({
   const inicial = vistaDesdeConsulta(await searchParams);
   const sesion = await sesionActual();
   if (!sesion) redirect("/login");
-  const lineas = await listarLineas(sesion);
+  const [lineas, actualizacion] = await Promise.all([listarLineas(sesion), ultimaActualizacion()]);
   const filas: FilaBandeja[] = lineas.map((l) => ({
     id: l.id,
     origen: l.origen,
@@ -49,7 +49,7 @@ export default async function PaginaBandeja({
   return (
     <>
       <Nav />
-      <Bandeja filas={filas} inicial={inicial} />
+      <Bandeja filas={filas} inicial={inicial} actualizacion={actualizacion} />
     </>
   );
 }
