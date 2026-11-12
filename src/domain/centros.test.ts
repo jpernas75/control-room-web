@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { USUARIO_CENTRO, centroDesdeCuenta, centroDesdeOr, cuentaNormalizada, nombreCuenta, normalizarCentro, resolverCentro } from "./centros";
+import { USUARIO_CENTRO, centroDesdeCuenta, centroDesdeOr, cuentaNormalizada, nombreCuenta, normalizarCentro, resolverCentro, textoCentroFila } from "./centros";
 
 describe("centros", () => {
   it("la cuenta de Porriño se llama Vigo y no distingue mayúsculas", () => {
@@ -27,6 +27,7 @@ describe("centros", () => {
     expect(resolverCentro({ centro2: "", numeroOr: "", cuenta: "", sedeExcel: "Lugo" })).toBe("Lugo");
     expect(resolverCentro({ centro2: "", numeroOr: "", cuenta: "99999", sedeExcel: "Bilbao" })).toBe("Sin centro");
     expect(resolverCentro({ centro2: "Duro e Hijos", numeroOr: "OV2600001", cuenta: "13518", sedeExcel: null })).toBe("Otros");
+    expect(textoCentroFila({ centro: { nombre: "Porriño" }, centro2: "Duro e Hijos", centroManual: false })).toBe("Duro e Hijos");
     expect(resolverCentro({ centro2: "Vigo", numeroOr: "OS2602194", cuenta: "39720", sedeExcel: null })).toBe("Porriño");
   });
 

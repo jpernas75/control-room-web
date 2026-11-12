@@ -13,6 +13,7 @@ export type FilaBandeja = {
   expedienteId: string;
   vin: string;
   centro: string;
+  centroGrupo: string;
   cliente: string;
   vehiculo: string;
   detalle: string;
@@ -188,7 +189,7 @@ export function Bandeja({ filas, inicial }: { filas: FilaBandeja[]; inicial: Vis
   }, [volver]);
 
   const centrosVisibles = useMemo(() => {
-    const presentes = new Set(filas.map((f) => f.centro));
+    const presentes = new Set(filas.map((f) => f.centroGrupo));
     const lista: string[] = CENTROS.filter((c) => presentes.has(c));
     if (presentes.has("Sin centro")) lista.push("Sin centro");
     if (presentes.has(OTROS)) lista.push(OTROS);
@@ -199,7 +200,7 @@ export function Bandeja({ filas, inicial }: { filas: FilaBandeja[]; inicial: Vis
     return filas.filter((f) => {
       if (ocultarDeshabilitadas && f.presencia === "DESHABILITADA") return false;
       if (ocultarAlertas && f.presencia === "ALERTA") return false;
-      if (centros.length > 0 && !centros.includes(f.centro)) return false;
+      if (centros.length > 0 && !centros.includes(f.centroGrupo)) return false;
       return true;
     });
   }, [filas, centros, ocultarDeshabilitadas, ocultarAlertas]);

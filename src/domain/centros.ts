@@ -109,3 +109,12 @@ export function nombreCentroVisible(linea: {
   if (esCentroAjeno(linea.centro2, linea.centroManual)) return OTROS;
   return linea.centro?.nombre ?? "Sin centro";
 }
+
+export function textoCentroFila(linea: {
+  centro: { nombre: string } | null;
+  centro2?: string | null;
+  centroManual?: boolean;
+}): string {
+  if (esCentroAjeno(linea.centro2, linea.centroManual)) return (linea.centro2 ?? "").trim();
+  return linea.centro?.nombre ?? "Sin centro";
+}
