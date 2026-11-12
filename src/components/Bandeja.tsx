@@ -90,6 +90,28 @@ function fechaVisible(iso: string): string {
   return m[4] ? `${dia} ${m[4]}:${m[5]}` : dia;
 }
 
+function diasAntiguedad(iso: string, hoy: string): number | null {
+  const dia = iso.slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dia) || !/^\d{4}-\d{2}-\d{2}$/.test(hoy.slice(0, 10))) return null;
+  const alta = Date.parse(`${dia}T00:00:00Z`);
+  const actual = Date.parse(`${hoy.slice(0, 10)}T00:00:00Z`);
+  if (Number.isNaN(alta) || Number.isNaN(actual)) return null;
+  return Math.max(0, Math.floor((actual - alta) / 86_400_000));
+}
+
+function claseAntiguedad(dias: number): string {
+  if (dias <= 1) return "bg-emerald-100 text-emerald-950";
+  if (dias <= 6) return "bg-lime-100 text-lime-950";
+  if (dias <= 14) return "bg-amber-100 text-amber-950";
+  return "bg-rose-100 text-rose-950";
+}
+
+function textoAntiguedad(dias: number): string {
+  if (dias === 0) return "hoy";
+  if (dias === 1) return "1 día";
+  return `${dias} días`;
+}
+
 function fechaCorta(iso: string): string {
   const m = iso.match(/(\d{4})-(\d{2})-(\d{2})/);
   return m ? `${m[3]}/${m[2]}` : "";
@@ -365,6 +387,7 @@ function Tabla({
   volver: string;
 }) {
   const columnas = controlRoom ? 11 : 8;
+  const hoy = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Madrid" });
   return (
     <div className="overflow-x-auto">
       <table className={`w-full text-left text-xs ${controlRoom ? "min-w-[1100px]" : "min-w-[880px]"}`}>
@@ -395,6 +418,7 @@ function Tabla({
                 <td className="whitespace-nowrap px-3 py-2 tabular-nums">
                   <MarcaNuevo nuevo={f.nuevo} />
                   {fechaVisible(f.fechaIso)}
+                  <EtiquetaAntiguedad iso={f.fechaIso} hoy={hoy} />
                 </td>
               ) : (
                 <td className="whitespace-nowrap px-3 py-2">
@@ -452,6 +476,14 @@ function Tabla({
         </tbody>
       </table>
     </div>
+  );
+}
+
+function EtiquetaAntiguedad({ iso, hoy }: { iso: string; hoy: string }) {
+  const dias = diasAntiguedad(iso, hoy);
+  if (dias === null) return null;
+  return (
+    <span className={`ml-2 rounded px-2 py-0.5 text-xs font-medium ${claseAntiguedad(dias)}`}>{textoAntiguedad(dias)}</span>
   );
 }
 
