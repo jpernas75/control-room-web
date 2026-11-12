@@ -464,9 +464,9 @@ function Tabla({
                 </td>
               ) : null}
               {controlRoom ? <td className="whitespace-nowrap px-3 py-2">{f.estadoIcss || "—"}</td> : null}
-              {controlRoom ? null : <td className="px-3 py-2">{f.desplazado ? "Sí" : ""}</td>}
+              {controlRoom ? null : <td className="px-3 py-2 align-middle">{f.desplazado ? "Sí" : ""}</td>}
               {controlRoom ? null : (
-                <td className="whitespace-nowrap px-3 py-2">
+                <td className="whitespace-nowrap px-3 py-2 align-middle">
                   <CeldaSolicitud fila={f} />
                 </td>
               )}
