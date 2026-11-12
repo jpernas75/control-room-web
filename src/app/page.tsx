@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { Bandeja, type FilaBandeja } from "@/components/Bandeja";
 import { Nav } from "@/components/Nav";
+import { avisoDeCita } from "@/domain/cita";
 import { textoDetalle } from "@/domain/comentario";
 import { nombreCentroVisible, textoCentroFila } from "@/domain/centros";
 import { vistaDesdeConsulta } from "@/domain/vista-bandeja";
@@ -43,6 +44,7 @@ export default async function PaginaBandeja({
     solicitarCr: l.solicitarCr,
     nuevo: l.esNuevo,
     fechaPrevista: l.fechaPrevista ?? "",
+    avisoCita: avisoDeCita(l.fechaPrevista, l.orCita, l.orFechaCita),
   }));
   return (
     <>

@@ -4,6 +4,7 @@ import { LlegadaPrevista, ReasignarCentro } from "@/components/CamposPreventivo"
 import { FormularioComentario } from "@/components/FormularioComentario";
 import { MarcarDesplazado } from "@/components/MarcarDesplazado";
 import { Nav } from "@/components/Nav";
+import { avisoDeCita, textoAvisoCita } from "@/domain/cita";
 import { CENTROS, nombreCentroVisible, OTROS, type CentroNombre } from "@/domain/centros";
 import { textoDetalle } from "@/domain/comentario";
 import { hrefBandeja } from "@/domain/vista-bandeja";
@@ -135,7 +136,10 @@ export default async function Ficha({
             action={guardarSolicitudCr.bind(null, linea.id)}
           />
         ) : linea.orFechaCita ? (
-          <p className="mt-6 text-sm">Cita de ICSS: {linea.orFechaCita}. Fecha de llegada prevista: {linea.fechaPrevista || "ninguna"}.</p>
+          <div className="mt-6 text-sm">
+            <p>Cita de CAR: {linea.orFechaCita}. Fecha de llegada prevista: {linea.fechaPrevista || "ninguna"}.</p>
+            <AvisoCita fechaWeb={linea.fechaPrevista} fechaCar={linea.orFechaCita} orCita={linea.orCita} />
+          </div>
         ) : (
           <form action={guardarFechaPrevista.bind(null, linea.id)} className="mt-6">
             <div className="flex items-end gap-2">
@@ -146,6 +150,7 @@ export default async function Ficha({
               {editar ? <button className="rounded-md border border-slate-300 px-3 py-2 text-sm" type="submit">Guardar fecha</button> : null}
             </div>
             <p className="mt-1 text-xs text-red-600">Para que la fecha sea válida crear una cita en CAR</p>
+            <AvisoCita fechaWeb={linea.fechaPrevista} fechaCar={linea.orFechaCita} orCita={linea.orCita} />
           </form>
         )}
 
@@ -171,6 +176,12 @@ function claseEstado(estado: string): string {
   if (clave === "billed") return "bg-emerald-100 text-emerald-950";
   if (clave === "closed") return "bg-slate-200 text-slate-700";
   return "bg-slate-100 text-slate-800";
+}
+
+function AvisoCita({ fechaWeb, fechaCar, orCita }: { fechaWeb: string | null; fechaCar: string; orCita: boolean }) {
+  const texto = textoAvisoCita(avisoDeCita(fechaWeb, orCita, fechaCar), fechaWeb, fechaCar);
+  if (!texto) return null;
+  return <p className="mt-2 text-sm font-medium text-rose-700">! {texto}</p>;
 }
 
 function EstadoTag({ estado }: { estado: string }) {

@@ -83,5 +83,6 @@ export async function guardarFechaPrevista(id: string, formData: FormData) {
   if (valor && !/^\d{4}-\d{2}-\d{2}$/.test(valor)) return;
   await prisma.linea.update({ where: { id }, data: { fechaPrevista: valor || null } });
   revalidatePath(`/lineas/${id}`);
+  revalidatePath("/");
   revalidatePath("/calendario");
 }

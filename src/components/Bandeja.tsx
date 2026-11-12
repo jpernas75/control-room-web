@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { textoAvisoCita } from "@/domain/cita";
 import { CENTROS, OTROS } from "@/domain/centros";
 import { esVco } from "@/domain/situacion";
 import { consultaDesdeVista, type ClaveOrden, type VistaBandeja } from "@/domain/vista-bandeja";
@@ -30,6 +31,7 @@ export type FilaBandeja = {
   desplazado: boolean;
   solicitarCr: boolean;
   fechaPrevista: string;
+  avisoCita: string;
   nuevo: boolean;
 };
 
@@ -123,6 +125,7 @@ function tieneOr(fila: FilaBandeja): boolean {
 }
 
 function claveOr(fila: FilaBandeja): string {
+  if (fila.fechaPrevista) return `1 ${fila.fechaPrevista}`;
   if (fila.orCita) return `1 ${fila.orFechaCita}`;
   if (tieneOr(fila)) return `2 ${fila.orNumero || fila.orId}`;
   return "0";
@@ -510,6 +513,15 @@ function EtiquetaCita({ fecha }: { fecha: string }) {
 }
 
 function CeldaOr({ fila }: { fila: FilaBandeja }) {
+  if (fila.fechaPrevista) {
+    const aviso = textoAvisoCita(fila.avisoCita, fila.fechaPrevista, fila.orFechaCita);
+    return (
+      <span className="whitespace-nowrap">
+        <EtiquetaCita fecha={fila.fechaPrevista} />
+        {aviso ? <span className="ml-1 font-bold text-rose-600" title={aviso} aria-label={aviso}>!</span> : null}
+      </span>
+    );
+  }
   if (fila.orCita) return <EtiquetaCita fecha={fila.orFechaCita} />;
   if (tieneOr(fila)) {
     const numero = fila.orNumero || fila.orId;
