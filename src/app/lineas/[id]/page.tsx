@@ -43,24 +43,29 @@ export default async function Ficha({
       <Link className="text-sm text-slate-600 underline" href={bandeja}>
         Volver a la bandeja
       </Link>
-      <article className="mt-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="text-xl font-semibold">
-          {linea.origen === "PREVENTIVO" ? "Preventivo" : "Control Room"} · {linea.centro?.nombre ?? "Sin centro"} · {linea.cliente}
-        </h1>
-        <p className="mt-1 text-sm text-slate-600">{linea.expedienteId || linea.vin}</p>
+      <article className="relative mt-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        {linea.estadoIcss ? (
+          <div className="absolute right-6 top-6 text-right">
+            <p className="text-xs text-slate-500">Estado</p>
+            <EstadoTag estado={linea.estadoIcss} />
+          </div>
+        ) : null}
+        <div className={linea.estadoIcss ? "pr-24" : ""}>
+          <h1 className="text-xl font-semibold">
+            {linea.origen === "PREVENTIVO" ? "Preventivo" : "Control Room"} · {linea.centro?.nombre ?? "Sin centro"} · {linea.cliente}
+          </h1>
+          <p className="mt-1 text-sm text-slate-600">{linea.expedienteId || linea.vin}</p>
+        </div>
+        {linea.prediagnostico ? (
+          <div className="mt-4 rounded-md border border-slate-300 bg-slate-50 px-4 py-3">
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Prediagnóstico</p>
+            <p className="mt-1 text-base font-semibold leading-snug text-slate-950">{linea.prediagnostico}</p>
+          </div>
+        ) : null}
         <dl className="mt-4 grid gap-2 text-sm">
-          {linea.estadoIcss ? (
-            <div>
-              <dt className="text-slate-500">Estado</dt>
-              <dd className="mt-0.5">
-                <EstadoTag estado={linea.estadoIcss} />
-              </dd>
-            </div>
-          ) : null}
-          <Dato k="VIN" v={linea.vin} />
-          <Dato k="Matrícula" v={linea.matricula} />
-          <Dato k="Modelo" v={linea.modelo} />
-          <Dato k="Prediagnóstico" v={linea.prediagnostico} />
+          <Dato k="VIN" v={linea.vin} suave />
+          <Dato k="Matrícula" v={linea.matricula} suave />
+          <Dato k="Modelo" v={linea.modelo} suave />
           <Dato k="OR" v={[linea.orNumero, linea.orEstado, linea.orFechaCita && `Cita ${linea.orFechaCita}`].filter(Boolean).join(" · ")} />
           <Dato k="Trigger" v={linea.trigger} />
           <Dato k="Obs" v={linea.obs} />
@@ -168,12 +173,12 @@ function EstadoTag({ estado }: { estado: string }) {
   return <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${claseEstado(estado)}`}>{estado}</span>;
 }
 
-function Dato({ k, v }: { k: string; v: string }) {
+function Dato({ k, v, suave = false }: { k: string; v: string; suave?: boolean }) {
   if (!v) return null;
   return (
-    <div>
+    <div className={suave ? "text-xs" : ""}>
       <dt className="text-slate-500">{k}</dt>
-      <dd>{v}</dd>
+      <dd className={suave ? "text-slate-600" : ""}>{v}</dd>
     </div>
   );
 }
