@@ -67,10 +67,12 @@ export default async function Ficha({
             <p className="mt-1 text-base font-semibold leading-snug text-slate-950">{linea.prediagnostico}</p>
           </div>
         ) : null}
-        <dl className="mt-4 grid gap-2 text-sm">
+        <dl className="mt-4 grid grid-cols-3 gap-x-4 gap-y-2 text-sm">
           <Dato k="VIN" v={linea.vin} suave />
           <Dato k="Matrícula" v={linea.matricula} suave />
           <Dato k="Modelo" v={linea.modelo} suave />
+        </dl>
+        <dl className="mt-4 grid gap-2 text-sm">
           {linea.centro2 ? <Dato k="Centro 2" v={linea.centro2} /> : null}
           <Dato k="OR" v={[linea.orNumero, linea.orEstado, linea.orFechaCita && `Cita ${linea.orFechaCita}`].filter(Boolean).join(" · ")} />
           <Dato k="Trigger" v={linea.trigger} />
