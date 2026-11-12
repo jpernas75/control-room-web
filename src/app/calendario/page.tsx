@@ -89,7 +89,7 @@ export default async function Calendario({
     ),
   );
   const meses = mesesCompletos(conDatos, hoy);
-  const mes = sp.mes && meses.includes(sp.mes) ? sp.mes : conDatos.at(-1) ?? hoy;
+  const mes = sp.mes && meses.includes(sp.mes) ? sp.mes : hoy;
   const idx = meses.indexOf(mes);
   const href = (m: string) => hrefMes(m, seleccion);
 
