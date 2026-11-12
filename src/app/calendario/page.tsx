@@ -8,7 +8,7 @@ import { listarLineas } from "@/lib/lineas";
 import { prisma } from "@/lib/prisma";
 import { sesionActual } from "@/lib/sesion";
 
-const RAYA = "bg-[repeating-linear-gradient(-45deg,#e2e8f0_0px,#e2e8f0_6px,#ffffff_6px,#ffffff_12px)]";
+const RAYA = "bg-[repeating-linear-gradient(-45deg,#e2e8f0_0px,#e2e8f0_1px,#ffffff_1px,#ffffff_7px)]";
 
 function lista(valor: string | string[] | undefined): string[] {
   if (!valor) return [];
@@ -141,8 +141,8 @@ function Mes({
   const celdas = [...Array(huecos).fill(null), ...Array.from({ length: dias }, (_, i) => i + 1)];
   return (
     <div className="grid grid-cols-7 gap-2">
-      {["L", "M", "X", "J", "V", "S", "D"].map((d, i) => (
-        <div key={d} className={`rounded-md py-1 text-center text-xs text-slate-500 ${i >= 5 ? RAYA : ""}`}>{d}</div>
+      {["L", "M", "X", "J", "V", "S", "D"].map((d) => (
+        <div key={d} className="py-1 text-center text-xs text-slate-500">{d}</div>
       ))}
       {celdas.map((dia, i) => {
         const iso = dia ? `${mes}-${String(dia).padStart(2, "0")}` : "";
