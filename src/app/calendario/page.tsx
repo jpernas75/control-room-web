@@ -98,14 +98,16 @@ export default async function Calendario({
     <>
     <Nav />
     <main className="mx-auto w-full max-w-[1600px] px-4 py-6 lg:px-6">
-      {admin ? <div className="mb-4"><ElegirCentro seleccion={seleccion} mes={mes} opciones={opciones} /></div> : null}
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        {idx > 0 ? <Link className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm" href={href(meses[idx - 1])}>Anterior</Link> : null}
-        <strong>{mes}</strong>
-        {idx >= 0 && idx < meses.length - 1 ? (
-          <Link className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm" href={href(meses[idx + 1])}>Siguiente</Link>
-        ) : null}
-        <ElegirMes mes={mes} meses={meses} centros={seleccion} />
+        {admin ? <ElegirCentro seleccion={seleccion} mes={mes} opciones={opciones} /> : null}
+        <div className="ml-auto flex flex-wrap items-center gap-3">
+          {idx > 0 ? <Link className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm" href={href(meses[idx - 1])}>Anterior</Link> : null}
+          <strong>{mes}</strong>
+          {idx >= 0 && idx < meses.length - 1 ? (
+            <Link className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm" href={href(meses[idx + 1])}>Siguiente</Link>
+          ) : null}
+          <ElegirMes mes={mes} meses={meses} centros={seleccion} />
+        </div>
       </div>
       {marcas.length === 0 ? (
         <p className="mb-4 text-sm text-slate-600">No hay citas ni órdenes en el calendario.</p>
