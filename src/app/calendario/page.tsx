@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ElegirCentro } from "@/components/ElegirCentro";
+import { ElegirMes } from "@/components/ElegirMes";
 import { Nav } from "@/components/Nav";
 import { CENTROS } from "@/domain/centros";
 import { marcasDeLinea, mesesCompletos, mesesConMarcas, type Marca } from "@/domain/calendario";
@@ -104,17 +105,7 @@ export default async function Calendario({
         {idx >= 0 && idx < meses.length - 1 ? (
           <Link className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm" href={href(meses[idx + 1])}>Siguiente</Link>
         ) : null}
-        <form action="/calendario" className="flex items-center gap-2">
-          {seleccion.map((centro) => (
-            <input key={centro} type="hidden" name="centro" value={centro} />
-          ))}
-          <select name="mes" defaultValue={mes} className="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm">
-            {meses.map((m) => (
-              <option key={m}>{m}</option>
-            ))}
-          </select>
-          <button className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm" type="submit">Ir</button>
-        </form>
+        <ElegirMes mes={mes} meses={meses} centros={seleccion} />
       </div>
       {marcas.length === 0 ? (
         <p className="mb-4 text-sm text-slate-600">No hay citas ni órdenes en el calendario.</p>
