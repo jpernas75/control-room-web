@@ -197,20 +197,21 @@ export function Bandeja({ filas, inicial }: { filas: FilaBandeja[]; inicial: Vis
   const estado = opciones.estado.includes(filtro.estado) ? filtro.estado : "";
   const detalle = opciones.detalle.includes(filtro.detalle) ? filtro.detalle : "";
   const consulta = normalizar(busqueda);
+  const coincide = (f: FilaBandeja) =>
+    !consulta || normalizar([f.expedienteId, f.vin, f.cliente, f.vehiculo, f.detalle].join(" ")).includes(consulta);
 
   const rooms = ordenar(
     roomsBase.filter((f) => {
       if (situacion && f.situacionTexto !== situacion) return false;
       if (estado && f.estadoIcss !== estado) return false;
       if (detalle && f.detalle !== detalle) return false;
-      if (consulta && !normalizar([f.expedienteId, f.cliente, f.vehiculo, f.detalle].join(" ")).includes(consulta)) return false;
-      return true;
+      return coincide(f);
     }),
     [sortCr],
   );
   const clavesPrev = sortPrev.key === "centro" ? [sortPrev, { key: "cliente" as const, dir: "asc" as const }] : [sortPrev];
   const preventivos = ordenar(
-    base.filter((f) => f.origen === "PREVENTIVO"),
+    base.filter((f) => f.origen === "PREVENTIVO" && coincide(f)),
     clavesPrev,
   );
 
@@ -265,9 +266,9 @@ export function Bandeja({ filas, inicial }: { filas: FilaBandeja[]; inicial: Vis
                 type="search"
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
-                placeholder="Expediente, cliente, vehículo o detalle"
+                placeholder="Expediente, VIN, cliente, vehículo o detalle"
                 className="w-full rounded border border-slate-300 bg-white px-3 py-2"
-                aria-label="Buscar por expediente, cliente, vehículo o detalle"
+                aria-label="Buscar por expediente, VIN, cliente, vehículo o detalle"
               />
             </label>
             <button
