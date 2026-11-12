@@ -60,6 +60,7 @@ model Linea {
   centroId         String?
   centro           Centro?    @relation(fields: [centroId], references: [id])
   centroManual     Boolean    @default(false)
+  centro2          String     @default("")
   cliente          String     @default("")
   matricula        String     @default("")
   modelo           String     @default("")

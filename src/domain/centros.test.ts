@@ -26,6 +26,8 @@ describe("centros", () => {
     expect(resolverCentro({ centro2: "", numeroOr: "", cuenta: "13518", sedeExcel: null })).toBe("Porriño");
     expect(resolverCentro({ centro2: "", numeroOr: "", cuenta: "", sedeExcel: "Lugo" })).toBe("Lugo");
     expect(resolverCentro({ centro2: "", numeroOr: "", cuenta: "99999", sedeExcel: "Bilbao" })).toBe("Sin centro");
+    expect(resolverCentro({ centro2: "Duro e Hijos", numeroOr: "OV2600001", cuenta: "13518", sedeExcel: null })).toBe("Otros");
+    expect(resolverCentro({ centro2: "Vigo", numeroOr: "OS2602194", cuenta: "39720", sedeExcel: null })).toBe("Porriño");
   });
 
   it("lee el prefijo y la cuenta sueltos", () => {

@@ -4,7 +4,7 @@ import { LlegadaPrevista, ReasignarCentro } from "@/components/CamposPreventivo"
 import { FormularioComentario } from "@/components/FormularioComentario";
 import { MarcarDesplazado } from "@/components/MarcarDesplazado";
 import { Nav } from "@/components/Nav";
-import { CENTROS } from "@/domain/centros";
+import { CENTROS, nombreCentroVisible, OTROS, type CentroNombre } from "@/domain/centros";
 import { textoDetalle } from "@/domain/comentario";
 import { hrefBandeja } from "@/domain/vista-bandeja";
 import { puedeEditar, puedeVer } from "@/domain/acceso";
@@ -32,8 +32,10 @@ export default async function Ficha({
   if (!linea || !puedeVer(sesion, linea)) notFound();
   const editar = puedeEditar(sesion, linea);
   const textoComentario = linea.origen === "PREVENTIVO" ? textoDetalle(linea) : linea.comentario;
+  const centro = nombreCentroVisible(linea);
+  const centroActual = (CENTROS as readonly string[]).includes(linea.centro?.nombre ?? "") ? (linea.centro?.nombre as CentroNombre) : "";
   const otros = linea.vin
-    ? await prisma.linea.findMany({ where: { vin: linea.vin, NOT: { id: linea.id } }, include: { centro: true } })
+    ? (await prisma.linea.findMany({ where: { vin: linea.vin, NOT: { id: linea.id } }, include: { centro: true } })).filter((o) => puedeVer(sesion, o))
     : [];
 
   return (
@@ -52,7 +54,7 @@ export default async function Ficha({
         ) : null}
         <div className={linea.estadoIcss ? "pr-24" : ""}>
           <h1 className="text-xl font-semibold">
-            {linea.origen === "PREVENTIVO" ? "Preventivo" : "Control Room"} · {linea.centro?.nombre ?? "Sin centro"} · {linea.cliente}
+            {linea.origen === "PREVENTIVO" ? "Preventivo" : "Control Room"} · {centro} · {linea.cliente}
           </h1>
           <p className="mt-1 text-sm text-slate-600">{linea.expedienteId || linea.vin}</p>
         </div>
@@ -66,6 +68,7 @@ export default async function Ficha({
           <Dato k="VIN" v={linea.vin} suave />
           <Dato k="Matrícula" v={linea.matricula} suave />
           <Dato k="Modelo" v={linea.modelo} suave />
+          {linea.centro2 ? <Dato k="Centro 2" v={linea.centro2} /> : null}
           <Dato k="OR" v={[linea.orNumero, linea.orEstado, linea.orFechaCita && `Cita ${linea.orFechaCita}`].filter(Boolean).join(" · ")} />
           <Dato k="Trigger" v={linea.trigger} />
           <Dato k="Obs" v={linea.obs} />
@@ -94,7 +97,7 @@ export default async function Ficha({
         {linea.origen === "PREVENTIVO" ? (
           <ReasignarCentro
             key={linea.centro?.nombre ?? ""}
-            centro={linea.centro?.nombre ?? ""}
+            centro={centroActual}
             editar={editar}
             action={cambiarCentro.bind(null, linea.id)}
           />
@@ -102,7 +105,8 @@ export default async function Ficha({
           <form action={cambiarCentro.bind(null, linea.id)} className="mt-6 flex items-end gap-2">
             <label className="text-sm font-medium">
               Reasignar centro
-              <select name="centro" defaultValue={linea.centro?.nombre ?? ""} disabled={!editar} className="mt-1 block rounded-md border border-slate-300 px-3 py-2">
+              <select name="centro" defaultValue={centroActual} disabled={!editar} className="mt-1 block rounded-md border border-slate-300 px-3 py-2">
+                {centro === OTROS ? <option value="">{OTROS} · {linea.centro2}</option> : null}
                 {CENTROS.map((c) => (
                   <option key={c}>{c}</option>
                 ))}

@@ -1,6 +1,7 @@
 export const CENTROS = ["Sada", "Porriño", "Orense", "Santiago", "Pontevedra", "Lugo"] as const;
 export type CentroNombre = (typeof CENTROS)[number];
-export type Centro = CentroNombre | "Sin centro";
+export type Centro = CentroNombre | "Sin centro" | "Otros";
+export const OTROS = "Otros";
 
 export const USUARIO_CENTRO: Record<string, CentroNombre> = {
   sada: "Sada",
@@ -85,11 +86,26 @@ export function resolverCentro(input: {
   cuenta: string | null;
   sedeExcel: string | null;
 }): Centro {
+  const centro2 = (input.centro2 ?? "").trim();
+  if (centro2) return normalizarCentro(centro2) ?? OTROS;
   return (
-    normalizarCentro(input.centro2) ??
     centroDesdeOr(input.numeroOr) ??
     centroDesdeCuenta(input.cuenta) ??
     normalizarCentro(input.sedeExcel) ??
     "Sin centro"
   );
+}
+
+export function esCentroAjeno(centro2: string | null | undefined, centroManual = false): boolean {
+  const texto = (centro2 ?? "").trim();
+  return !centroManual && Boolean(texto) && !normalizarCentro(texto);
+}
+
+export function nombreCentroVisible(linea: {
+  centro: { nombre: string } | null;
+  centro2?: string | null;
+  centroManual?: boolean;
+}): string {
+  if (esCentroAjeno(linea.centro2, linea.centroManual)) return OTROS;
+  return linea.centro?.nombre ?? "Sin centro";
 }

@@ -93,6 +93,7 @@ function casoADatos(caso: Record<string, unknown>): DatosCr | null {
     abierto: Boolean(caso.open),
     pago: texto(fields.Pago),
     cuenta,
+    centro2: texto(caso.centro2),
     centroResuelto: resolverCentro({
       centro2: texto(caso.centro2),
       numeroOr: or?.numero ?? "",

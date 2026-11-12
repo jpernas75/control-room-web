@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Bandeja, type FilaBandeja } from "@/components/Bandeja";
 import { Nav } from "@/components/Nav";
 import { textoDetalle } from "@/domain/comentario";
+import { nombreCentroVisible } from "@/domain/centros";
 import { vistaDesdeConsulta } from "@/domain/vista-bandeja";
 import { listarLineas } from "@/lib/lineas";
 import { sesionActual } from "@/lib/sesion";
@@ -23,7 +24,7 @@ export default async function PaginaBandeja({
     presencia: l.presencia,
     expedienteId: l.expedienteId ?? "",
     vin: l.vin,
-    centro: l.centro?.nombre ?? "Sin centro",
+    centro: nombreCentroVisible(l),
     cliente: l.cliente,
     vehiculo: l.matricula,
     detalle: textoDetalle(l),

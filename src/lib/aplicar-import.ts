@@ -44,6 +44,7 @@ function camposCr(d: DatosCr) {
     abierto: d.abierto,
     pago: d.pago,
     cuenta: d.cuenta,
+    centro2: d.centro2,
     vco: d.vco,
     orId: d.or?.id ?? "",
     orNumero: d.or?.numero ?? "",
@@ -57,7 +58,7 @@ function camposCr(d: DatosCr) {
 }
 
 async function idCentro(nombre: Centro): Promise<string | null> {
-  if (nombre === "Sin centro") return null;
+  if (nombre === "Sin centro" || nombre === "Otros") return null;
   const centro = await prisma.centro.findUnique({ where: { nombre } });
   return centro?.id ?? null;
 }

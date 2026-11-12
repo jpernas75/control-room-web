@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { CENTROS } from "@/domain/centros";
+import { CENTROS, OTROS } from "@/domain/centros";
 import { esVco } from "@/domain/situacion";
 import { consultaDesdeVista, type ClaveOrden, type VistaBandeja } from "@/domain/vista-bandeja";
 
@@ -191,6 +191,7 @@ export function Bandeja({ filas, inicial }: { filas: FilaBandeja[]; inicial: Vis
     const presentes = new Set(filas.map((f) => f.centro));
     const lista: string[] = CENTROS.filter((c) => presentes.has(c));
     if (presentes.has("Sin centro")) lista.push("Sin centro");
+    if (presentes.has(OTROS)) lista.push(OTROS);
     return lista;
   }, [filas]);
 

@@ -20,4 +20,11 @@ describe("acceso", () => {
     expect(puedeVer(sada, { centroId: "id-sada" })).toBe(true);
     expect(puedeEditar(sada, { centroId: "id-sada" })).toBe(true);
   });
+
+  it("un Centro 2 ajeno solo lo ve la cuenta Administrador", () => {
+    const ajeno = { centroId: "id-porrino", centro2: "Duro e Hijos", centroManual: false };
+    expect(puedeVer({ ...admin, principal: true }, ajeno)).toBe(true);
+    expect(puedeVer(admin, ajeno)).toBe(false);
+    expect(puedeVer(sada, ajeno)).toBe(false);
+  });
 });

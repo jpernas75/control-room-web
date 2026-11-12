@@ -25,6 +25,7 @@ export type DatosCr = {
   abierto: boolean;
   pago: string;
   cuenta: string;
+  centro2: string;
   centroResuelto: Centro;
   vco: boolean;
   or: {

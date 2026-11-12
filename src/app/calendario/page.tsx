@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { ElegirCentro } from "@/components/ElegirCentro";
 import { ElegirMes } from "@/components/ElegirMes";
 import { Nav } from "@/components/Nav";
-import { CENTROS } from "@/domain/centros";
+import { CENTROS, nombreCentroVisible, OTROS } from "@/domain/centros";
 import { marcasDeLinea, mesesCompletos, mesesConMarcas, type Marca } from "@/domain/calendario";
 import { listarLineas } from "@/lib/lineas";
 import { prisma } from "@/lib/prisma";
@@ -54,9 +54,14 @@ export default async function Calendario({
   const todas = await listarLineas(sesion);
   const admin = sesion.role === "ADMIN";
   const porId = new Map(catalogo.map((c) => [c.id, c.nombre]));
-  const opciones = [...CENTROS, ...(todas.some((l) => !l.centro) ? ["Sin centro" as const] : [])];
+  const nombre = (l: (typeof todas)[number]) => nombreCentroVisible(l);
+  const opciones = [
+    ...CENTROS,
+    ...(todas.some((l) => nombre(l) === "Sin centro") ? ["Sin centro" as const] : []),
+    ...(todas.some((l) => nombre(l) === OTROS) ? [OTROS] : []),
+  ];
   const seleccion = admin ? nombresCentro(sp.centro, porId, new Set(opciones)) : [];
-  const delCentro = seleccion.length === 0 ? todas : todas.filter((l) => seleccion.includes(l.centro?.nombre ?? "Sin centro"));
+  const delCentro = seleccion.length === 0 ? todas : todas.filter((l) => seleccion.includes(nombre(l)));
   const fechaHoy = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Madrid" });
   const marcas = delCentro.flatMap((l) =>
     marcasDeLinea(

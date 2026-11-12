@@ -1,14 +1,19 @@
-export type Sesion = { role: "ADMIN" | "CENTRO"; centroId: string | null };
+import { esCentroAjeno } from "./centros";
 
-function permitido(sesion: Sesion, linea: { centroId: string | null }): boolean {
+export type Sesion = { role: "ADMIN" | "CENTRO"; centroId: string | null; principal?: boolean };
+
+function permitido(sesion: Sesion, linea: { centroId: string | null; centro2?: string | null; centroManual?: boolean }): boolean {
+  if (esCentroAjeno(linea.centro2, linea.centroManual)) return sesion.principal === true;
   if (sesion.role === "ADMIN") return true;
   return linea.centroId !== null && linea.centroId === sesion.centroId;
 }
 
-export function puedeVer(sesion: Sesion, linea: { centroId: string | null }): boolean {
+type LineaAcceso = { centroId: string | null; centro2?: string | null; centroManual?: boolean };
+
+export function puedeVer(sesion: Sesion, linea: LineaAcceso): boolean {
   return permitido(sesion, linea);
 }
 
-export function puedeEditar(sesion: Sesion, linea: { centroId: string | null }): boolean {
+export function puedeEditar(sesion: Sesion, linea: LineaAcceso): boolean {
   return permitido(sesion, linea);
 }

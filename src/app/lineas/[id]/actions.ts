@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { CENTROS, type CentroNombre } from "@/domain/centros";
+import { CENTROS, esCentroAjeno, OTROS, type CentroNombre } from "@/domain/centros";
 import { puedeEditar } from "@/domain/acceso";
 import { prisma } from "@/lib/prisma";
 import { sesionActual } from "@/lib/sesion";
@@ -47,9 +47,11 @@ export async function cambiarCentro(id: string, formData: FormData) {
   if (!CENTROS.includes(hacia as CentroNombre)) return;
   const destino = await prisma.centro.findUnique({ where: { nombre: hacia } });
   if (!destino) return;
-  const desde = ctx.linea.centroId
-    ? (await prisma.centro.findUnique({ where: { id: ctx.linea.centroId } }))?.nombre ?? "Sin centro"
-    : "Sin centro";
+  const desde = esCentroAjeno(ctx.linea.centro2, ctx.linea.centroManual)
+    ? OTROS
+    : ctx.linea.centroId
+      ? (await prisma.centro.findUnique({ where: { id: ctx.linea.centroId } }))?.nombre ?? "Sin centro"
+      : "Sin centro";
   if (desde === hacia) return;
   await prisma.$transaction([
     prisma.linea.update({ where: { id }, data: { centroId: destino.id, centroManual: true } }),
