@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { LlegadaPrevista, ReasignarCentro } from "@/components/CamposPreventivo";
+import { FormularioComentario } from "@/components/FormularioComentario";
 import { MarcarDesplazado } from "@/components/MarcarDesplazado";
 import { Nav } from "@/components/Nav";
 import { CENTROS } from "@/domain/centros";
@@ -131,20 +132,16 @@ export default async function Ficha({
           </form>
         )}
 
-        <form action={guardarComentario.bind(null, linea.id)} className="mt-6">
-          <label className="block text-sm font-medium">
-            Comentario
-            <textarea name="comentario" defaultValue={textoComentario} rows={4} disabled={!editar} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
-          </label>
-          {linea.comentarioAt ? (
-            <p className="mt-1 text-xs text-slate-500">
-              {linea.comentarioUser?.name ?? "Alguien"} · {linea.comentarioAt.toLocaleString("es-ES", { timeZone: "Europe/Madrid" })}
-            </p>
-          ) : textoComentario ? null : (
-            <p className="mt-1 text-xs text-slate-500">Sin comentario</p>
-          )}
-          {editar ? <button className="mt-2 rounded-md bg-slate-900 px-3 py-1.5 text-sm text-white" type="submit">Guardar comentario</button> : null}
-        </form>
+        <FormularioComentario
+          action={guardarComentario.bind(null, linea.id)}
+          texto={textoComentario}
+          firma={
+            linea.comentarioAt
+              ? `${linea.comentarioUser?.name ?? "Alguien"} · ${linea.comentarioAt.toLocaleString("es-ES", { timeZone: "Europe/Madrid" })}`
+              : null
+          }
+          editar={editar}
+        />
       </article>
       </main>
     </>
