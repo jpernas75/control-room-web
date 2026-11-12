@@ -423,7 +423,7 @@ function Tabla({
           {filas.map((f) => {
             const sombreada = !controlRoom && f.desplazado;
             return (
-            <tr key={f.id} className={`border-t ${sombreada ? "border-orange-100 bg-orange-100" : f.nuevo ? "border-emerald-100 bg-emerald-50" : "border-slate-100"}`}>
+            <tr key={f.id} className={`border-t align-middle ${sombreada ? "border-orange-100 bg-orange-100" : f.nuevo ? "border-emerald-100 bg-emerald-50" : "border-slate-100"}`}>
               {controlRoom ? (
                 <td className="whitespace-nowrap px-3 py-2 tabular-nums">
                   <MarcaNuevo nuevo={f.nuevo} />
@@ -464,10 +464,16 @@ function Tabla({
                 </td>
               ) : null}
               {controlRoom ? <td className="whitespace-nowrap px-3 py-2">{f.estadoIcss || "—"}</td> : null}
-              {controlRoom ? null : <td className="px-3 py-2 align-middle">{f.desplazado ? "Sí" : ""}</td>}
               {controlRoom ? null : (
-                <td className="whitespace-nowrap px-3 py-2 align-middle">
-                  <CeldaSolicitud fila={f} />
+                <td className="h-px px-3 align-middle">
+                  <div className="flex h-full items-center py-2">{f.desplazado ? "Sí" : ""}</div>
+                </td>
+              )}
+              {controlRoom ? null : (
+                <td className="h-px whitespace-nowrap px-3 align-middle">
+                  <div className="flex h-full items-center py-2">
+                    <CeldaSolicitud fila={f} />
+                  </div>
                 </td>
               )}
               {controlRoom ? null : (
