@@ -459,8 +459,7 @@ function MarcaNuevo({ nuevo }: { nuevo: boolean }) {
 
 function CeldaSolicitud({ fila }: { fila: FilaBandeja }) {
   if (!fila.solicitarCr) return null;
-  const fecha = fila.fechaPrevista ? fechaVisible(fila.fechaPrevista) : "";
-  return <span>{fecha ? `Sí · ${fecha}` : "Sí"}</span>;
+  return <span>Sí</span>;
 }
 
 function EtiquetaCita({ fecha }: { fecha: string }) {
