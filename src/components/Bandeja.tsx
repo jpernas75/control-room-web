@@ -409,7 +409,7 @@ function Tabla({
             <SortTh label="Cliente" sortKey="cliente" sort={sort} onSort={onSort} />
             {controlRoom ? <SortTh label="Vehículo" sortKey="vehiculo" sort={sort} onSort={onSort} /> : null}
             {controlRoom ? <th className="px-3 py-2 font-medium">VCO</th> : null}
-            <SortTh label="Detalle" sortKey="detalle" sort={sort} onSort={onSort} />
+            <SortTh label={controlRoom ? "Detalle" : "Comentarios"} sortKey="detalle" sort={sort} onSort={onSort} />
             {controlRoom ? <th className="px-3 py-2 font-medium">Comentarios</th> : null}
             {controlRoom ? <SortTh label="OR CAR" sortKey="or" sort={sort} onSort={onSort} /> : null}
             {controlRoom ? <SortTh label="Estado" sortKey="estado" sort={sort} onSort={onSort} /> : null}
