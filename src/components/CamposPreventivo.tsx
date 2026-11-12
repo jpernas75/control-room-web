@@ -49,7 +49,7 @@ export function LlegadaPrevista({
   function enviar(siguientePedido: boolean, siguienteFecha: string) {
     const datos = new FormData();
     if (siguientePedido) datos.set("solicitar", "1");
-    datos.set("fecha", siguientePedido ? siguienteFecha : "");
+    datos.set("fecha", siguienteFecha);
     void action(datos);
   }
 
@@ -62,24 +62,22 @@ export function LlegadaPrevista({
           disabled={!editar}
           onChange={(e) => {
             const on = e.target.checked;
-            const siguiente = on ? dia : "";
             setPedido(on);
-            if (!on) setDia("");
-            enviar(on, siguiente);
+            enviar(on, dia);
           }}
           className="size-4 rounded border-slate-300"
         />
         Solicitar Control Room
       </label>
-      <label className={`mt-4 block text-sm font-medium ${pedido ? "" : "text-slate-400"}`}>
+      <label className="mt-4 block text-sm font-medium">
         Fecha de llegada prevista
         <input
           type="date"
           value={dia}
-          disabled={!editar || !pedido}
+          disabled={!editar}
           onChange={(e) => {
             setDia(e.target.value);
-            enviar(true, e.target.value);
+            enviar(pedido, e.target.value);
           }}
           className="mt-1 block rounded-md border border-slate-300 px-3 py-2 disabled:bg-slate-50"
         />
