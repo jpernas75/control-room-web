@@ -19,6 +19,7 @@ describe("vista de la bandeja", () => {
     expect(vista.estado).toBe("");
     expect(vista.situacion).toBe("Pendiente");
     expect(vista.busqueda).toBe("5784NBC");
+    expect(vista.soloVco).toBe(false);
     expect(vista.ocultarDeshabilitadas).toBe(true);
     expect(vista.ocultarAlertas).toBe(true);
     const otra = vistaDesdeConsulta(new URLSearchParams(consultaDesdeVista(vista)));
@@ -28,5 +29,6 @@ describe("vista de la bandeja", () => {
   it("el enlace de vuelta solo acepta los filtros de la bandeja", () => {
     expect(hrefBandeja(undefined)).toBe("/");
     expect(hrefBandeja("centro=Lugo&estado=&siguiente=https://otro.example")).toBe("/?centro=Lugo&estado=");
+    expect(hrefBandeja("vco=1")).toBe("/?vco=1");
   });
 });

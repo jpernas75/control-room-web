@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { CENTROS } from "@/domain/centros";
+import { esVco } from "@/domain/situacion";
 import { consultaDesdeVista, type ClaveOrden, type VistaBandeja } from "@/domain/vista-bandeja";
 
 export type FilaBandeja = {
@@ -140,6 +141,7 @@ export function Bandeja({ filas, inicial }: { filas: FilaBandeja[]; inicial: Vis
   const [ocultarAlertas, setOcultarAlertas] = useState(inicial.ocultarAlertas);
   const [filtro, setFiltro] = useState<FiltroCr>({ situacion: inicial.situacion, estado: inicial.estado, detalle: inicial.detalle });
   const [busqueda, setBusqueda] = useState(inicial.busqueda);
+  const [soloVco, setSoloVco] = useState(inicial.soloVco);
   const [sortCr, setSortCr] = useState(inicial.ordenCr);
   const [sortPrev, setSortPrev] = useState(inicial.ordenPrev);
   const volver = consultaDesdeVista({
@@ -150,6 +152,7 @@ export function Bandeja({ filas, inicial }: { filas: FilaBandeja[]; inicial: Vis
     estado: filtro.estado,
     detalle: filtro.detalle,
     busqueda,
+    soloVco,
     ordenCr: sortCr,
     ordenPrev: sortPrev,
   });
@@ -177,7 +180,10 @@ export function Bandeja({ filas, inicial }: { filas: FilaBandeja[]; inicial: Vis
     });
   }, [filas, centros, ocultarDeshabilitadas, ocultarAlertas]);
 
-  const roomsBase = useMemo(() => base.filter((f) => f.origen === "CONTROL_ROOM"), [base]);
+  const roomsBase = useMemo(
+    () => base.filter((f) => f.origen === "CONTROL_ROOM" && (!soloVco || esVco(f.detalle))),
+    [base, soloVco],
+  );
   const opciones = useMemo(
     () => ({
       situacion: unicos(roomsBase, (f) => f.situacionTexto),
@@ -218,27 +224,29 @@ export function Bandeja({ filas, inicial }: { filas: FilaBandeja[]; inicial: Vis
 
   return (
     <main className="mx-auto w-full max-w-[1600px] px-4 py-6 lg:px-6">
-      <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Filtrar por centro">
-        <button
-          type="button"
-          onClick={() => setCentros([])}
-          className={chip(centros.length === 0)}
-        >
-          Todos
-        </button>
-        {centrosVisibles.map((nombre) => (
-          <button key={nombre} type="button" onClick={() => alternarCentro(nombre)} className={chip(centros.includes(nombre))}>
-            {nombre}
+      <div className="mb-4 flex items-center gap-3">
+        <div className="flex min-w-0 flex-1 flex-wrap gap-2" role="group" aria-label="Filtrar por centro">
+          <button
+            type="button"
+            onClick={() => setCentros([])}
+            className={chip(centros.length === 0)}
+          >
+            Todos
           </button>
-        ))}
-      </div>
-      <div className="mb-4 flex gap-2 text-sm">
-        <button type="button" onClick={() => setOcultarDeshabilitadas((v) => !v)} className="rounded-md border border-slate-200 bg-white px-3 py-1.5">
-          {ocultarDeshabilitadas ? "Mostrar deshabilitados" : "Ocultar deshabilitados"}
-        </button>
-        <button type="button" onClick={() => setOcultarAlertas((v) => !v)} className="rounded-md border border-slate-200 bg-white px-3 py-1.5">
-          {ocultarAlertas ? "Mostrar alertas" : "Ocultar alertas"}
-        </button>
+          {centrosVisibles.map((nombre) => (
+            <button key={nombre} type="button" onClick={() => alternarCentro(nombre)} className={chip(centros.includes(nombre))}>
+              {nombre}
+            </button>
+          ))}
+        </div>
+        <div className="flex shrink-0 gap-2 text-sm">
+          <button type="button" onClick={() => setOcultarDeshabilitadas((v) => !v)} className="rounded-md border border-slate-200 bg-white px-3 py-1.5">
+            {ocultarDeshabilitadas ? "Mostrar deshabilitados" : "Ocultar deshabilitados"}
+          </button>
+          <button type="button" onClick={() => setOcultarAlertas((v) => !v)} className="rounded-md border border-slate-200 bg-white px-3 py-1.5">
+            {ocultarAlertas ? "Mostrar alertas" : "Ocultar alertas"}
+          </button>
+        </div>
       </div>
 
       <section className="mb-8 rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -249,17 +257,27 @@ export function Bandeja({ filas, inicial }: { filas: FilaBandeja[]; inicial: Vis
           <SelectFiltro label="Situación" value={situacion} options={opciones.situacion} onChange={(value) => setFiltro({ ...filtro, situacion: value })} />
           <SelectFiltro label="Estado" value={estado} options={opciones.estado} onChange={(value) => setFiltro({ ...filtro, estado: value })} />
           <SelectFiltro label="Detalle" value={detalle} options={opciones.detalle} largo onChange={(value) => setFiltro({ ...filtro, detalle: value })} />
-          <label className="w-full min-w-[16rem] max-w-sm flex-1 text-sm">
-            <span className="mb-1 block font-medium text-slate-700">Buscar</span>
-            <input
-              type="search"
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              placeholder="Expediente, cliente, vehículo o detalle"
-              className="w-full rounded border border-slate-300 bg-white px-3 py-2"
-              aria-label="Buscar por expediente, cliente, vehículo o detalle"
-            />
-          </label>
+          <div className="flex w-full min-w-[16rem] max-w-xl flex-1 items-end gap-2 text-sm">
+            <label className="min-w-0 flex-1">
+              <span className="mb-1 block font-medium text-slate-700">Buscar</span>
+              <input
+                type="search"
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                placeholder="Expediente, cliente, vehículo o detalle"
+                className="w-full rounded border border-slate-300 bg-white px-3 py-2"
+                aria-label="Buscar por expediente, cliente, vehículo o detalle"
+              />
+            </label>
+            <button
+              type="button"
+              aria-pressed={soloVco}
+              onClick={() => setSoloVco((v) => !v)}
+              className={`rounded border px-3 py-2 ${soloVco ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white text-slate-700"}`}
+            >
+              Solo VCO
+            </button>
+          </div>
         </div>
         <Tabla
           filas={rooms}
@@ -344,7 +362,7 @@ function Tabla({
   controlRoom?: boolean;
   volver: string;
 }) {
-  const columnas = controlRoom ? 10 : 7;
+  const columnas = controlRoom ? 11 : 7;
   return (
     <div className="overflow-x-auto">
       <table className={`w-full text-left text-xs ${controlRoom ? "min-w-[1100px]" : "min-w-[880px]"}`}>
@@ -356,6 +374,7 @@ function Tabla({
             {controlRoom ? <SortTh label="Centro" sortKey="centro" sort={sort} onSort={onSort} /> : null}
             <SortTh label="Cliente" sortKey="cliente" sort={sort} onSort={onSort} />
             {controlRoom ? <SortTh label="Vehículo" sortKey="vehiculo" sort={sort} onSort={onSort} /> : null}
+            {controlRoom ? <th className="px-3 py-2 font-medium">VCO</th> : null}
             <SortTh label="Detalle" sortKey="detalle" sort={sort} onSort={onSort} />
             {controlRoom ? <SortTh label="OR CAR" sortKey="or" sort={sort} onSort={onSort} /> : null}
             {controlRoom ? <SortTh label="Estado" sortKey="estado" sort={sort} onSort={onSort} /> : null}
@@ -389,6 +408,9 @@ function Tabla({
               {controlRoom ? <td className="px-3 py-2">{f.centro}</td> : null}
               <td className="max-w-[12rem] truncate px-3 py-2" title={f.cliente}>{f.cliente}</td>
               {controlRoom ? <td className="px-3 py-2">{f.vehiculo}</td> : null}
+              {controlRoom ? (
+                <td className="px-3 py-2">{esVco(f.detalle) ? <span className="rounded bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-950">VCO</span> : null}</td>
+              ) : null}
               <td className="max-w-[18rem] truncate px-3 py-2 text-slate-600" title={f.detalle}>{f.detalle}</td>
               {controlRoom ? (
                 <td className="px-3 py-2">

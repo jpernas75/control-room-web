@@ -12,6 +12,7 @@ export type VistaBandeja = {
   estado: string;
   detalle: string;
   busqueda: string;
+  soloVco: boolean;
   ordenCr: OrdenBandeja;
   ordenPrev: OrdenBandeja;
 };
@@ -24,6 +25,7 @@ export const VISTA_INICIAL: VistaBandeja = {
   estado: "Open",
   detalle: "",
   busqueda: "",
+  soloVco: false,
   ordenCr: { key: "fecha", dir: "desc" },
   ordenPrev: { key: "centro", dir: "asc" },
 };
@@ -65,6 +67,7 @@ export function vistaDesdeConsulta(entrada: Consulta): VistaBandeja {
     estado,
     detalle: texto(lista(entrada, "detalle")[0] ?? "", 1500),
     busqueda: texto(lista(entrada, "q")[0] ?? "", 200),
+    soloVco: lista(entrada, "vco").includes("1"),
     ordenCr: orden(lista(entrada, "ord")[0], VISTA_INICIAL.ordenCr),
     ordenPrev: orden(lista(entrada, "ordp")[0], VISTA_INICIAL.ordenPrev),
   };
@@ -79,6 +82,7 @@ export function consultaDesdeVista(vista: VistaBandeja): string {
   if (vista.estado !== VISTA_INICIAL.estado) params.set("estado", vista.estado);
   if (vista.detalle) params.set("detalle", vista.detalle);
   if (vista.busqueda) params.set("q", vista.busqueda);
+  if (vista.soloVco) params.set("vco", "1");
   if (vista.ordenCr.key !== VISTA_INICIAL.ordenCr.key || vista.ordenCr.dir !== VISTA_INICIAL.ordenCr.dir) {
     params.set("ord", `${vista.ordenCr.key}.${vista.ordenCr.dir}`);
   }
