@@ -4,7 +4,7 @@ import { LlegadaPrevista, ReasignarCentro } from "@/components/CamposPreventivo"
 import { FormularioComentario } from "@/components/FormularioComentario";
 import { MarcarDesplazado } from "@/components/MarcarDesplazado";
 import { Nav } from "@/components/Nav";
-import { avisoDeCita, textoAvisoCita } from "@/domain/cita";
+import { avisoDeCita, textoAvisoCita, type OrCarAviso } from "@/domain/cita";
 import { CENTROS, nombreCentroVisible, OTROS, type CentroNombre } from "@/domain/centros";
 import { textoDetalle } from "@/domain/comentario";
 import { hrefBandeja } from "@/domain/vista-bandeja";
@@ -142,10 +142,23 @@ export default async function Ficha({
             />
             <Actualizacion cuando={actualizacion} />
           </>
-        ) : linea.orFechaCita ? (
+        ) : linea.orFechaCita || linea.orNumero || linea.orEstado || linea.orFechaEntrega || linea.orCita ? (
           <div className="mt-6 text-sm">
-            <p>Cita de CAR: {linea.orFechaCita}. Fecha de llegada prevista: {linea.fechaPrevista || "ninguna"}.</p>
-            <AvisoCita fechaWeb={linea.fechaPrevista} fechaCar={linea.orFechaCita} orCita={linea.orCita} />
+            {linea.orFechaCita ? (
+              <p>Cita de CAR: {linea.orFechaCita}. Fecha de llegada prevista: {linea.fechaPrevista || "ninguna"}.</p>
+            ) : null}
+            <AvisoCita
+              fechaWeb={linea.fechaPrevista}
+              fechaCar={linea.orFechaCita}
+              orCita={linea.orCita}
+              or={{
+                cita: linea.orCita,
+                fechaCita: linea.orFechaCita,
+                fechaEntrega: linea.orFechaEntrega,
+                numero: linea.orNumero,
+                estado: linea.orEstado,
+              }}
+            />
             <Actualizacion cuando={actualizacion} />
           </div>
         ) : (
@@ -192,8 +205,18 @@ function Actualizacion({ cuando }: { cuando: string }) {
   return <p className="mt-2 text-xs text-slate-500">Última actualización {cuando}</p>;
 }
 
-function AvisoCita({ fechaWeb, fechaCar, orCita }: { fechaWeb: string | null; fechaCar: string; orCita: boolean }) {
-  const texto = textoAvisoCita(avisoDeCita(fechaWeb, orCita, fechaCar), fechaWeb, fechaCar);
+function AvisoCita({
+  fechaWeb,
+  fechaCar,
+  orCita,
+  or,
+}: {
+  fechaWeb: string | null;
+  fechaCar: string;
+  orCita: boolean;
+  or?: OrCarAviso | null;
+}) {
+  const texto = textoAvisoCita(avisoDeCita(fechaWeb, orCita, fechaCar, or), fechaWeb, fechaCar);
   if (!texto) return null;
   return <p className="mt-2 text-sm font-medium text-rose-700">! {texto}</p>;
 }
