@@ -1,5 +1,13 @@
 export type AvisoCita = "" | "sin" | "distinta";
 
+export type OrCarAviso = {
+  cita?: boolean;
+  fechaCita?: string | null;
+  fechaEntrega?: string | null;
+  numero?: string | null;
+  estado?: string | null;
+};
+
 export function diaCita(raw: string | null | undefined): string {
   const texto = String(raw ?? "").trim();
   const iso = texto.match(/(\d{4})-(\d{2})-(\d{2})/);
@@ -16,12 +24,40 @@ export function fechaCitaVisible(raw: string | null | undefined): string {
   return `${d}/${mes}/${ano}`;
 }
 
-export function avisoDeCita(fechaWeb: string | null | undefined, orCita: boolean, fechaCar: string | null | undefined): AvisoCita {
+export function orCarSuperaManual(or: OrCarAviso | null | undefined): boolean {
+  if (!or) return false;
+  return Boolean(
+    or.cita ||
+      diaCita(or.fechaCita) ||
+      diaCita(or.fechaEntrega) ||
+      String(or.numero ?? "").trim() ||
+      String(or.estado ?? "").trim(),
+  );
+}
+
+export function fechaPrevistaTrasImport(
+  or: OrCarAviso | null | undefined,
+  actual: string | null | undefined,
+): string | null {
+  if (orCarSuperaManual(or)) return null;
+  return actual ?? null;
+}
+
+export function avisoDeCita(
+  fechaWeb: string | null | undefined,
+  orCita: boolean,
+  fechaCar: string | null | undefined,
+  or?: OrCarAviso | null,
+): AvisoCita {
   if (!diaCita(fechaWeb)) return "";
-  const car = orCita ? diaCita(fechaCar) : "";
-  if (!car) return "sin";
-  if (car !== diaCita(fechaWeb)) return "distinta";
-  return "";
+  if (orCita) {
+    const car = diaCita(fechaCar);
+    if (!car) return orCarSuperaManual(or) ? "" : "sin";
+    if (car !== diaCita(fechaWeb)) return "distinta";
+    return "";
+  }
+  if (orCarSuperaManual(or)) return "";
+  return "sin";
 }
 
 export function textoAvisoCita(aviso: string, fechaWeb?: string | null, fechaCar?: string | null): string {

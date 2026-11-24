@@ -118,6 +118,71 @@ describe("planImportJson", () => {
     expect(si.ok && si.acciones).toEqual([{ tipo: "deshabilitar", lineaId: "c1", expedienteId: "111" }]);
   });
 
+  it("un JSON con OR entregada actualiza el expediente y deja atrás la cita manual", () => {
+    const linea: LineaConocida = {
+      id: "l-8003009552",
+      origen: "CONTROL_ROOM",
+      presencia: "ACTIVA",
+      expedienteId: "8003009552",
+      vin: "ZCFME2AX10C545738",
+      fechaIso: "2026-10-27T11:07:35",
+      cuenta: "39723",
+      vco: true,
+    };
+    const plan = planImportJson(
+      {
+        period: payloadBase.period,
+        filtros: { centro2: "Lugo", centro: "", tipo: "", estado: "", buscar: "", rapido: "" },
+        casos: [
+          caso({
+            id: "8003009552",
+            centro: "39723",
+            fecha_iso: "2026-10-27T11:07:35",
+            fields: {
+              VIN: "ZCFME2AX10C545738",
+              Cliente: "YONATAN PEREZ SUAREZ",
+              Matrícula: "0905MZV",
+              modelo: "AS440S58T/P",
+              Km: "190584",
+              Prediagnóstico: "MY24_Heavy_Engine_VCR: order kit for PID VCO",
+              Fase: "Waiting for arrival",
+              Pago: "Warranty",
+            },
+            or_car: {
+              id: "91905",
+              numero: "OL2602337",
+              estado: "Vehículo entregado",
+              url: "https://www.cloudactivereception.com/admin/es/workfile/edit/91905",
+              fecha: "",
+              fecha_entrega: "2026-11-20",
+              fecha_cita: "",
+              cita: false,
+            },
+            centro2: "Lugo",
+          }),
+        ],
+      },
+      [linea],
+    );
+    expect(plan.ok).toBe(true);
+    if (!plan.ok) return;
+    expect(plan.acciones).toHaveLength(1);
+    const accion = plan.acciones[0];
+    expect(accion).toMatchObject({ tipo: "upsert_cr", lineaId: "l-8003009552" });
+    if (accion.tipo !== "upsert_cr") return;
+    expect(accion.datos.or).toEqual({
+      id: "91905",
+      numero: "OL2602337",
+      estado: "Vehículo entregado",
+      url: "https://www.cloudactivereception.com/admin/es/workfile/edit/91905",
+      fecha: "",
+      fechaCita: "",
+      fechaEntrega: "2026-11-20",
+      cita: false,
+    });
+    expect(accion.datos.centro2).toBe("Lugo");
+  });
+
   it("resume altas, actualizaciones y deshabilitados", () => {
     expect(
       resumirJson([

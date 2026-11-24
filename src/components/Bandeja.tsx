@@ -126,9 +126,9 @@ function tieneOr(fila: FilaBandeja): boolean {
 }
 
 function claveOr(fila: FilaBandeja): string {
-  if (fila.fechaPrevista) return `1 ${fila.fechaPrevista}`;
   if (fila.orCita) return `1 ${fila.orFechaCita}`;
   if (tieneOr(fila)) return `2 ${fila.orNumero || fila.orId}`;
+  if (fila.fechaPrevista) return `1 ${fila.fechaPrevista}`;
   return "0";
 }
 
@@ -576,6 +576,23 @@ function textoPopup(aviso: string, actualizacion: string): string {
 }
 
 function CeldaOr({ fila, actualizacion }: { fila: FilaBandeja; actualizacion: string }) {
+  if (fila.orCita) return <EtiquetaCita fecha={fila.orFechaCita} />;
+  if (tieneOr(fila)) {
+    const numero = fila.orNumero || fila.orId;
+    const enlace = fila.orUrl ? (
+      <a className="font-medium underline" href={fila.orUrl} target="_blank" rel="noopener noreferrer">
+        {numero}
+      </a>
+    ) : (
+      <span className="font-medium">{numero}</span>
+    );
+    return (
+      <span className="block whitespace-nowrap">
+        {enlace}
+        {fila.orEstado ? <span className="block text-xs text-slate-500">{fila.orEstado}</span> : null}
+      </span>
+    );
+  }
   if (fila.fechaPrevista) {
     const aviso = textoAvisoCita(fila.avisoCita, fila.fechaPrevista, fila.orFechaCita);
     const popup = textoPopup(aviso, actualizacion);
@@ -593,23 +610,6 @@ function CeldaOr({ fila, actualizacion }: { fila: FilaBandeja; actualizacion: st
             </svg>
           </span>
         ) : null}
-      </span>
-    );
-  }
-  if (fila.orCita) return <EtiquetaCita fecha={fila.orFechaCita} />;
-  if (tieneOr(fila)) {
-    const numero = fila.orNumero || fila.orId;
-    const enlace = fila.orUrl ? (
-      <a className="font-medium underline" href={fila.orUrl} target="_blank" rel="noopener noreferrer">
-        {numero}
-      </a>
-    ) : (
-      <span className="font-medium">{numero}</span>
-    );
-    return (
-      <span className="block whitespace-nowrap">
-        {enlace}
-        {fila.orEstado ? <span className="block text-xs text-slate-500">{fila.orEstado}</span> : null}
       </span>
     );
   }

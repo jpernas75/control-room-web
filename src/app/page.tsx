@@ -45,7 +45,13 @@ export default async function PaginaBandeja({
     solicitarCr: l.solicitarCr,
     nuevo: l.esNuevo,
     fechaPrevista: l.fechaPrevista ?? "",
-    avisoCita: avisoDeCita(l.fechaPrevista, l.orCita, l.orFechaCita),
+    avisoCita: avisoDeCita(l.fechaPrevista, l.orCita, l.orFechaCita, {
+      cita: l.orCita,
+      fechaCita: l.orFechaCita,
+      fechaEntrega: l.orFechaEntrega,
+      numero: l.orNumero,
+      estado: l.orEstado,
+    }),
   }));
   return (
     <>

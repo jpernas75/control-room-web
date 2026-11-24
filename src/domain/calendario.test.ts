@@ -42,6 +42,18 @@ describe("calendario", () => {
       "2026-11-11",
     )[0];
     expect(hecha).toMatchObject({ tipo: "realizada", desde: "2026-10-26", hasta: "2026-10-29" });
+    const hechaConManual = marcasDeLinea(
+      {
+        ...vacia,
+        fechaPrevista: "2026-11-16",
+        orCita: false,
+        orEstado: "Vehículo entregado",
+        orFechaEntrega: "2026-11-20",
+      },
+      "2026-11-24",
+    );
+    expect(hechaConManual.map((m) => m.tipo)).toEqual(["realizada"]);
+    expect(hechaConManual[0]).toMatchObject({ desde: "2026-11-20", hasta: "2026-11-20" });
     const gris = marcasDeLinea(
       { ...vacia, presencia: "DESHABILITADA", orCita: true, orFechaCita: "2026-11-24", orEstado: "Cita" },
       "2026-11-11",

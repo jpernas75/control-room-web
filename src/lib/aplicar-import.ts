@@ -1,5 +1,6 @@
 import * as XLSX from "xlsx";
 import type { Centro } from "@/domain/centros";
+import { orCarSuperaManual } from "@/domain/cita";
 import { leerFilas, planImportExcel, resumirExcel, type DatosPreventivo } from "@/domain/plan-excel";
 import { planImportJson, resumirJson } from "@/domain/plan-json";
 import type { DatosCr, LineaConocida } from "@/domain/types";
@@ -83,9 +84,10 @@ export async function aplicarJson(payload: unknown) {
       }
       const datos = accion.datos;
       const base = camposCr(datos);
+      const car = orCarSuperaManual(datos.or) ? { fechaPrevista: null } : {};
       const centroId = await idCentro(datos.centroResuelto);
       if (accion.tipo === "upsert_cr" && !accion.lineaId) {
-        await tx.linea.create({ data: { ...base, centroId, centroManual: false, esNuevo: true } });
+        await tx.linea.create({ data: { ...base, ...car, centroId, centroManual: false, esNuevo: true } });
         continue;
       }
       if (accion.tipo === "upsert_cr" || accion.tipo === "convertir") {
@@ -94,7 +96,7 @@ export async function aplicarJson(payload: unknown) {
         const campos = actual?.centroManual ? base : { ...base, centroId };
         await tx.linea.update({
           where: { id },
-          data: accion.tipo === "convertir" ? { ...campos, esNuevo: true } : campos,
+          data: accion.tipo === "convertir" ? { ...campos, ...car, esNuevo: true } : { ...campos, ...car },
         });
         continue;
       }
@@ -110,7 +112,7 @@ export async function aplicarJson(payload: unknown) {
           comentarioAt: prev?.comentario ? prev.comentarioAt : undefined,
           desplazado: prev?.desplazado ?? undefined,
           solicitarCr: prev?.solicitarCr ?? undefined,
-          fechaPrevista: prev?.fechaPrevista ?? undefined,
+          fechaPrevista: orCarSuperaManual(datos.or) ? null : prev?.fechaPrevista ?? undefined,
         },
       });
       await tx.linea.delete({ where: { id: accion.preventivoId } });
